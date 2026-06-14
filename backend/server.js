@@ -52,6 +52,11 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// Ruta para mantener el servidor activo (Keep-alive)
+app.get('/api/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.post('/api/admin/login', (req, res) => {
   const { user, pass } = req.body || {};
   if (user === ADMIN_USER && pass === ADMIN_PASS) {
