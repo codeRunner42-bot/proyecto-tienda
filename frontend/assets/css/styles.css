@@ -87,6 +87,9 @@ button{cursor:pointer;}
 .page-header{padding:36px 0 16px;}
 .page-main{padding:0 0 48px;}
 .action-row{margin-top:24px;display:flex;gap:14px;justify-content:flex-end;flex-wrap:wrap;}
+.sort-container { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.sort-select { padding: 10px 16px; border-radius: 999px; border: 1px solid var(--border); background: #fff; color: var(--text); font-weight: 700; cursor: pointer; outline: none; box-shadow: 0 10px 24px rgba(36,42,51,0.04); transition: border-color 0.2s; }
+.sort-select:hover { border-color: var(--accent); }
 .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#fbf7f1 0%,#f1e9db 100%);}
 .login-card{background:var(--surface);padding:40px;border-radius:28px;box-shadow:var(--shadow);width:100%;max-width:420px;border:1px solid var(--border);}
 .login-card h1{margin:0 0 10px;font-size:1.6rem;text-align:center;color:var(--accent-strong);font-weight:800;}

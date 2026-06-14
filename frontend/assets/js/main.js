@@ -1,8 +1,11 @@
 let products = [];
 let cart = JSON.parse(localStorage.getItem('cart')||'[]');
+let currentCategory = 'all';
+let currentSort = 'relevance';
 const productsEl = document.getElementById('products');
 const cartCount = document.getElementById('cartCount');
 const cartBtn = document.getElementById('cartBtn');
+const sortSelect = document.getElementById('sortSelect');
 
 function updateCartUI(){
   cartCount.textContent = cart.reduce((s,i)=>s+i.qty,0);
@@ -24,18 +27,46 @@ function renderProducts(list){
   productsEl.innerHTML = list.map(p=>`<article class="product"><img src="${p.image}" alt="${p.name}"><h3>${p.name}</h3><p>${p.description}</p><div class="price">$${p.price.toFixed(2)}</div><button onclick="addToCart('${p.id}')">Añadir</button></article>`).join('');
 }
 
+function updateDisplay() {
+  let filtered = [...products];
+
+  // 1. Filtrar por categoría
+  if (currentCategory !== 'all') {
+    filtered = filtered.filter(p => p.category === currentCategory);
+  }
+
+  // 2. Ordenar
+  if (currentSort === 'price-low') filtered.sort((a, b) => a.price - b.price);
+  else if (currentSort === 'price-high') filtered.sort((a, b) => b.price - a.price);
+  else if (currentSort === 'name-az') filtered.sort((a, b) => a.name.localeCompare(b.name));
+  else if (currentSort === 'name-za') filtered.sort((a, b) => b.name.localeCompare(a.name));
+
+  renderProducts(filtered);
+}
+
 function load(){
-  fetch('/api/products').then(r=>r.json()).then(data=>{products=data;renderProducts(products);}).catch(()=>{products=[];renderProducts([])});
+  fetch('/api/products').then(r=>r.json()).then(data=>{products=data;updateDisplay();}).catch(()=>{products=[];renderProducts([])});
   updateCartUI();
 }
 
 function filterCategory(cat){
-  const btns = document.querySelectorAll('.cat-btn');btns.forEach(b=>b.classList.toggle('active',b.dataset.cat===cat||cat==='all'&&b.dataset.cat==='all'));
-  if(cat==='all') renderProducts(products);
-  else renderProducts(products.filter(p=>p.category===cat));
+  currentCategory = cat;
+  const btns = document.querySelectorAll('.cat-btn, .cat-card');
+  btns.forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  updateDisplay();
 }
 
-document.addEventListener('click',e=>{ if(e.target.matches('.cat-btn')){filterCategory(e.target.dataset.cat)} });
+document.addEventListener('click',e=>{ 
+  if(e.target.matches('.cat-btn') || e.target.closest('.cat-card')){
+    const cat = e.target.dataset.cat || e.target.closest('.cat-card').dataset.cat;
+    filterCategory(cat);
+  } 
+});
+
+sortSelect?.addEventListener('change', (e) => {
+  currentSort = e.target.value;
+  updateDisplay();
+});
 
 const waHandler = e => {
     e.preventDefault();

@@ -61,6 +61,16 @@
           <h2>Productos destacados</h2>
           <p>Explora maquillaje, perfumería, celular y accesorios que combinan calidad y estilo en cada detalle.</p>
         </div>
+        <div class="sort-container">
+          <label for="sortSelect" style="font-weight: 700; color: var(--muted); font-size: 0.9rem;">Ordenar por:</label>
+          <select id="sortSelect" class="sort-select">
+            <option value="relevance">Relevancia</option>
+            <option value="price-low">Precio: Menor a Mayor</option>
+            <option value="price-high">Precio: Mayor a Menor</option>
+            <option value="name-az">Nombre: A - Z</option>
+            <option value="name-za">Nombre: Z - A</option>
+          </select>
+        </div>
       </div>
       <section id="products" class="products-grid"></section>
     </section>
