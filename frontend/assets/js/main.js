@@ -1,5 +1,3 @@
-const PHONE = '573022880520'; // <--- CAMBIA ESTE NÚMERO (ejemplo: 573101234567)
-
 let products = [];
 let cart = JSON.parse(localStorage.getItem('cart')||'[]');
 const productsEl = document.getElementById('products');

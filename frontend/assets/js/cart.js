@@ -1,5 +1,3 @@
-const PHONE = '573022880520'; // <--- CAMBIA ESTE NÚMERO TAMBIÉN
-
 function formatCurrency(n){return '$'+Number(n).toFixed(2)}
 let cart = JSON.parse(localStorage.getItem('cart')||'[]');
 const cartList = document.getElementById('cartList');
