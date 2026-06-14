@@ -6,20 +6,22 @@
   <title>Login - Administración</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body>
-  <div class="page-wrapper">
-    <h1>Iniciar Sesión Administrativa</h1>
+<body class="login-screen">
+  <div class="login-card">
+    <a href="index.html" style="display:block; text-align:center; margin-bottom:20px; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:2px;">← Volver a la tienda</a>
+    <h1>Acceso Admin</h1>
+    <p>Ingresa tus credenciales para gestionar productos y pedidos.</p>
+    
     <div id="loginStatus"></div>
-    <form id="loginForm">
-      <div>
-        <label>Usuario:</label>
-        <input type="text" name="user" required>
-      </div>
-      <div>
-        <label>Contraseña:</label>
-        <input type="password" name="pass" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Entrar</button>
+    
+    <form id="loginForm" class="admin-form">
+      <label>Usuario
+        <input type="text" name="user" placeholder="Ej: admin" required>
+      </label>
+      <label>Contraseña
+        <input type="password" name="pass" placeholder="••••••••" required>
+      </label>
+      <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
     </form>
   </div>
   <script src="assets/js/admin-login.js"></script>
