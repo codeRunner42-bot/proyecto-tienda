@@ -37,12 +37,15 @@ function filterCategory(cat){
 
 document.addEventListener('click',e=>{ if(e.target.matches('.cat-btn')){filterCategory(e.target.dataset.cat)} });
 
-document.getElementById('whatsappLink').addEventListener('click', e => {
-  e.preventDefault();
-  const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
-  const text = encodeURIComponent('¡Hola! Me gustaría recibir más información sobre sus productos.');
-  const url = `https://wa.me/${number}?text=${text}`;
-  window.open(url, '_blank');
-});
+const waHandler = e => {
+    e.preventDefault();
+    const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
+    const text = encodeURIComponent('¡Hola! Me gustaría recibir más información sobre sus productos.');
+    const url = `https://wa.me/${number}?text=${text}`;
+    window.open(url, '_blank');
+};
+
+document.getElementById('whatsappLink')?.addEventListener('click', waHandler);
+document.getElementById('topWhatsappLink')?.addEventListener('click', waHandler);
 
 load();
