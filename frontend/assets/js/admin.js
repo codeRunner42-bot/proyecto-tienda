@@ -6,6 +6,9 @@ const productForm = document.getElementById('productForm');
 const formTitle = document.getElementById('formTitle');
 const newProductBtn = document.getElementById('newProductBtn');
 const cancelEditBtn = document.getElementById('cancelEdit');
+const imagePreview = document.getElementById('imagePreview');
+const imageInput = productForm.querySelector('[name="image"]');
+const imageUpload = document.getElementById('imageUpload');
 let allProducts = [];
 
 function getAdminToken() {
@@ -46,9 +49,11 @@ async function fetchProducts() {
 
 function renderProductTable(products) {
   adminListBody.innerHTML = products.map(product => {
+    const imgSrc = product.image || 'https://via.placeholder.com/400x300?text=Sin+Imagen';
     return `
       <tr data-id="${product.id}">
         <td>${product.id}</td>
+        <td><img src="${imgSrc}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);"></td>
         <td>${product.name}</td>
         <td>${product.category}</td>
         <td>${Number(product.price).toFixed(2)}</td>
@@ -66,6 +71,7 @@ function resetForm() {
   productForm.reset();
   productForm.id.value = '';
   formTitle.textContent = 'Agregar producto';
+  imagePreview.src = 'https://via.placeholder.com/400x300?text=Vista+Previa';
   showStatus('Rellena el formulario para agregar un producto nuevo.', 'info');
 }
 
@@ -77,6 +83,7 @@ function fillForm(product) {
   productForm.stock.value = product.stock;
   productForm.image.value = product.image;
   productForm.description.value = product.description;
+  imagePreview.src = product.image || 'https://via.placeholder.com/400x300?text=Sin+Imagen';
   formTitle.textContent = 'Editar producto';
   showStatus(`Editando producto ${product.id}.`, 'info');
 }
@@ -158,6 +165,24 @@ productForm.addEventListener('submit', async (event) => {
     resetForm();
   } catch (error) {
     showStatus(error.message, 'error');
+  }
+});
+
+// Actualizar vista previa cuando cambia la URL
+imageInput.addEventListener('input', () => {
+  const url = imageInput.value.trim() || 'https://via.placeholder.com/400x300?text=Vista+Previa';
+  imagePreview.src = url;
+});
+
+// Actualizar vista previa cuando se selecciona un archivo local
+imageUpload.addEventListener('change', () => {
+  const file = imageUpload.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imagePreview.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 });
 

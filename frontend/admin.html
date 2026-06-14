@@ -20,6 +20,9 @@
     <form id="productForm" class="admin-form">
       <h2 id="formTitle">Agregar producto</h2>
       <input type="hidden" name="id">
+      <div class="image-preview-wrapper" style="text-align: center; margin-bottom: 20px;">
+        <img id="imagePreview" src="https://via.placeholder.com/400x300?text=Vista+Previa" alt="Vista Previa" style="max-width: 160px; height: 160px; object-fit: cover; border-radius: 20px; border: 2px solid var(--border); box-shadow: var(--shadow);">
+      </div>
       <input type="text" name="name" placeholder="Nombre" required>
       <input type="text" name="category" placeholder="Categoría" required>
       <input type="number" name="price" placeholder="Precio" step="0.01" required>
@@ -40,6 +43,7 @@
       <thead>
         <tr>
           <th>ID</th>
+          <th>Imagen</th>
           <th>Nombre</th>
           <th>Categoría</th>
           <th>Precio</th>
