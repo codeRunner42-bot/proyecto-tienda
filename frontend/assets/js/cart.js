@@ -40,7 +40,13 @@ document.getElementById('buyBtn').addEventListener('click',()=>{
   location.href='checkout.html';
 });
 
-document.getElementById('whatsappLink').addEventListener('click',e=>{e.preventDefault();const url=`https://wa.me/${PHONE}`;window.open(url,'_blank')});
+document.getElementById('whatsappLink').addEventListener('click', e => {
+  e.preventDefault();
+  const number = typeof PHONE !== 'undefined' ? PHONE : '573022880520';
+  const text = encodeURIComponent('¡Hola! Tengo productos en mi carrito y me gustaría finalizar mi compra.');
+  const url = `https://wa.me/${number}?text=${text}`;
+  window.open(url, '_blank');
+});
 
 // Cargar productos para obtener stock y luego renderizar el carrito
 fetch('/api/products').then(r=>r.json()).then(list=>{ productsMap = {}; list.forEach(p=>productsMap[p.id]=p); renderCart(); }).catch(()=>{ productsMap = {}; renderCart(); });
