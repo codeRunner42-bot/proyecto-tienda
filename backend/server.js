@@ -53,7 +53,7 @@ function requireAdmin(req, res, next) {
 }
 
 // Ruta para mantener el servidor activo (Keep-alive)
-app.get('/ap/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).send('OK');
 });
 
