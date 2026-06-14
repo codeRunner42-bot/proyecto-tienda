@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Carrito - Tienda</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+ </head>
+<body>
+  <header class="site-header">
+    <div class="top-bar page-wrapper">
+      <p>Compra segura • Atención rápida por WhatsApp • <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></p>
+    </div>
+
+    <div class="main-header page-wrapper">
+      <a class="back-btn" href="index.html">← Volver</a>
+      <a class="brand" href="index.html">Tienda</a>
+      <div class="header-actions">
+        <a class="cart" id="cartBtn" href="cart.html">Carrito (<span id="cartCount">0</span>)</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <section class="page-header page-wrapper">
+      <div>
+        <h2>Tu Carrito</h2>
+        <p>Revisa lo que has agregado, ajusta las cantidades y selecciona los artículos que quieres comprar.</p>
+      </div>
+    </section>
+
+    <section class="page-wrapper">
+      <div id="cartList"></div>
+      <div class="action-row">
+        <button class="btn btn-secondary" id="backShop" onclick="location.href='index.html'">Seguir comprando</button>
+        <button class="btn btn-primary" id="buyBtn">Comprar seleccionados</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer page-wrapper">
+    <div>Conéctate con nosotros: <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></div>
+    <div>Tel/WhatsApp: <a id="whatsappLink" href="#">Enviar WhatsApp</a></div>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/cart.js"></script>
+</body>
+</html>

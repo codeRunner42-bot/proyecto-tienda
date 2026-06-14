@@ -1,0 +1,173 @@
+[
+  {
+    "id": "p1",
+    "name": "Paleta de sombras",
+    "category": "maquillaje",
+    "price": 20000,
+    "stock": 10,
+    "description": "Paleta variada de sombras.",
+    "image": "https://img.kwcdn.com/product/fancy/0da70b61-9b04-4e9f-83dc-52b81050707c.jpg"
+  },
+  {
+    "id": "p2",
+    "name": "SAFFRON OUD",
+    "category": "perfumeria",
+    "price": 150000,
+    "stock": 5,
+    "description": "Amaderada especiada, unisex, seductora y  misteriosa.\nmezcla de vainilla, azafrán y la riqueza del OUD genera una estela magnética, duradera y sofisticada. Ideal para climas fríos y ocasiones especiales.",
+    "image": "https://cdn.valmara.co/58292-large_default/perfume-unisex-orientica-oud-safron-de-al-haramain-100-ml-edp.webp"
+  },
+  {
+    "id": "p3",
+    "name": "AirPods Pro 2",
+    "category": "tecnologia",
+    "price": 65000,
+    "stock": 3,
+    "description": "Chip H2 de Apple.\nCancelación de Ruido Activa.\nAudio Espacial Personalizado.\nControl Táctil Inteligente.\nHasta 6 horas de reproducción y 30 horas totales con el estuche.",
+    "image": "https://mac-center.com/cdn/shop/files/AirPods_Pro_en_su_estuche_con_MagSafe.jpg?v=1742255727&width=823"
+  },
+  {
+    "id": "p4",
+    "name": "Cargador USB-C 20W",
+    "category": "accesorios",
+    "price": 25000,
+    "stock": 2,
+    "description": "Velocidad óptima.\nCompatibilidad.\nDiseño ultra compacto.\nCarga segura.",
+    "image": "https://www.smartgadgets.com.co/cdn/shop/files/9.1.jpg?v=1734211112"
+  },
+  {
+    "id": "p5",
+    "name": "Diadema Air Pro Max",
+    "category": "accesorios",
+    "price": 59.99,
+    "stock": 4,
+    "description": "Diadema con cancelación de ruido.",
+    "image": "https://via.placeholder.com/400x300?text=Diadema"
+  },
+  {
+    "id": "p6",
+    "name": "Bálsamo Labial Natural",
+    "category": "cuidado personal",
+    "price": 4.5,
+    "stock": 25,
+    "description": "Hidratación suave para labios secos.",
+    "image": "https://via.placeholder.com/400x300?text=Balsamo"
+  },
+  {
+    "id": "p7",
+    "name": "Serum Vitamina C",
+    "category": "maquillaje",
+    "price": 18,
+    "stock": 12,
+    "description": "Suero iluminador para tu piel.",
+    "image": "https://via.placeholder.com/400x300?text=Serum"
+  },
+  {
+    "id": "p8",
+    "name": "Set de Brochas",
+    "category": "maquillaje",
+    "price": 34.95,
+    "stock": 15,
+    "description": "Brochas profesionales para rostro y ojos.",
+    "image": "https://via.placeholder.com/400x300?text=Brochas"
+  },
+  {
+    "id": "p9",
+    "name": "Crema Hidratante",
+    "category": "cuidado personal",
+    "price": 22,
+    "stock": 18,
+    "description": "Crema diaria para piel suave.",
+    "image": "https://via.placeholder.com/400x300?text=Crema"
+  },
+  {
+    "id": "p10",
+    "name": "Cepillo Facial Sónico",
+    "category": "cuidado personal",
+    "price": 45,
+    "stock": 6,
+    "description": "Limpieza profunda con vibración suave.",
+    "image": "https://via.placeholder.com/400x300?text=Cepillo"
+  },
+  {
+    "id": "p11",
+    "name": "Batería Externa 10000mAh",
+    "category": "tecnologia",
+    "price": 25.99,
+    "stock": 14,
+    "description": "Carga rápida para varios dispositivos.",
+    "image": "https://via.placeholder.com/400x300?text=PowerBank"
+  },
+  {
+    "id": "p12",
+    "name": "Auriculares Gaming RGB",
+    "category": "tecnologia",
+    "price": 79.99,
+    "stock": 8,
+    "description": "Sonido envolvente con micrófono.",
+    "image": "https://via.placeholder.com/400x300?text=Gaming"
+  },
+  {
+    "id": "p13",
+    "name": "Mascarilla Facial de Arcilla",
+    "category": "perfumeria",
+    "price": 8.99,
+    "stock": 20,
+    "description": "Renueva y purifica tu piel.",
+    "image": "https://via.placeholder.com/400x300?text=Mascarilla"
+  },
+  {
+    "id": "p14",
+    "name": "Set de cuidado de uñas",
+    "category": "accesorios",
+    "price": 15,
+    "stock": 9,
+    "description": "Herramientas completas para manicure.",
+    "image": "https://via.placeholder.com/400x300?text=Uñas"
+  },
+  {
+    "id": "p15",
+    "name": "Perfume Amaderado",
+    "category": "perfumeria",
+    "price": 34,
+    "stock": 7,
+    "description": "Aroma elegante para el día o la noche.",
+    "image": "https://via.placeholder.com/400x300?text=PerfumeAmaderado"
+  },
+  {
+    "id": "p16",
+    "name": "Audífonos Over-Ear",
+    "category": "tecnologia",
+    "price": 59,
+    "stock": 10,
+    "description": "Cómodos y con sonido claro.",
+    "image": "https://via.placeholder.com/400x300?text=Audifonos"
+  },
+  {
+    "id": "p17",
+    "name": "Kit de Esmalte Semipermanente",
+    "category": "accesorios",
+    "price": 27.5,
+    "stock": 11,
+    "description": "Colores intensos y duraderos.",
+    "image": "https://via.placeholder.com/400x300?text=Esmalte"
+  },
+  {
+    "id": "p18",
+    "name": "Set de Masajes Relax",
+    "category": "cuidado personal",
+    "price": 39.99,
+    "stock": 5,
+    "description": "Aromaterapia y relajación en casa.",
+    "image": "https://via.placeholder.com/400x300?text=Masajes"
+  },
+  {
+    "id": "p19",
+    "name": "Cargador USB-C 25W",
+    "category": "accesorios",
+    "price": 25000,
+    "stock": 2,
+    "description": "Carga Ultra Rápida.\nTecnología Inteligente.\nMáxima versatilidad.\nSeguridad avanzada:.",
+    "image": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCQOEkvi-EgmGSww9u2YW2HyAqy-2hH1f8jbAduoVvEP6YfhCOwp1g1o-ozC2DYFJVuXPni_gJsgCngoJJNf19GsyLBJXc4Qy8q1B5pBmeuM_WC3eQQZLT6Q"
+  }
+]

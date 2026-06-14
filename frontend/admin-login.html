@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <main class="page-main page-wrapper" style="max-width:420px;margin:80px auto;">
+    <section class="page-header">
+      <div>
+        <h2>Login de administrador</h2>
+        <p>Accede al panel de administración para gestionar productos y pedidos.</p>
+      </div>
+    </section>
+
+    <section class="admin-form-wrapper">
+      <form id="loginForm" class="admin-form">
+        <label>Usuario<input name="user" required></label>
+        <label>Contraseña<input name="pass" type="password" required></label>
+        <button type="submit" class="btn btn-primary">Entrar</button>
+        <div id="loginStatus" class="message info">Usa usuario <strong>admin</strong> y contraseña <strong>1234</strong>.</div>
+      </form>
+    </section>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/admin-login.js"></script>
+</body>
+</html>

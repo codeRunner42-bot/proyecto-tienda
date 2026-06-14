@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pedidos - Administración</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="top-bar page-wrapper">
+      <p>Revisa y administra los pedidos recibidos.</p>
+    </div>
+
+    <div class="main-header page-wrapper">
+      <a class="back-btn" href="admin.html">← Volver al admin</a>
+      <a class="brand" href="admin.html">Pedidos</a>
+      <div class="header-actions">
+        <a class="cart" id="cartBtn" href="cart.html">Carrito (<span id="cartCount">0</span>)</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <section class="page-header page-wrapper">
+      <div>
+        <h2>Pedidos recibidos</h2>
+        <p>Controla el estado de cada pedido, desde pendiente hasta entregado.</p>
+      </div>
+    </section>
+
+    <section class="page-wrapper admin-panel">
+      <div class="admin-header">
+        <input id="orderSearch" type="search" placeholder="Buscar por ID, cliente o teléfono" />
+      </div>
+      <div id="orderStatus" class="message"></div>
+      <div class="admin-table-wrapper">
+        <table class="admin-table" id="ordersTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Teléfono</th>
+              <th>Total</th>
+              <th>Pago</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer page-wrapper">
+    <div>Administrador de pedidos.</div>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/admin-orders.js"></script>
+</body>
+</html>

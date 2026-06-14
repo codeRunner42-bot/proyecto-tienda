@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tienda - Maquillaje, Tecnología, Perfumería</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="top-bar page-wrapper">
+      <p>Envíos nacionales rápidos • <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a> • <a href="https://wa.me/573001234567?text=Hola%20quiero%20asesor%C3%ADa" target="_blank">WhatsApp</a></p>
+    </div>
+
+    <div class="main-header page-wrapper">
+      <div class="header-side"></div>
+      <a class="brand" href="index.html">Tienda</a>
+      <div class="header-actions">
+        <a class="cart" id="cartBtn" href="cart.html">Carrito (<span id="cartCount">0</span>)</a>
+      </div>
+    </div>
+
+    <nav class="category-nav page-wrapper">
+      <button data-cat="all" class="cat-btn active">Todos</button>
+      <button data-cat="maquillaje" class="cat-btn">Maquillaje</button>
+      <button data-cat="perfumeria" class="cat-btn">Perfumería</button>
+      <button data-cat="tecnologia" class="cat-btn">Tecnología</button>
+      <button data-cat="accesorios" class="cat-btn">Accesorios</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero page-wrapper">
+      <div class="hero-copy">
+        <span class="eyebrow">Tienda online</span>
+        <h1>Encuentra maquillaje, tecnología y perfumería con estilo propio.</h1>
+        <p>Un escaparate moderno para tus compras, con atención por WhatsApp y opciones de pago seguras como Nequi o contra entrega.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#products">Ver productos</a>
+          <a class="btn btn-secondary" href="cart.html">Ir al carrito</a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=900&q=80" alt="Productos de belleza y tecnología" />
+      </div>
+    </section>
+
+    <section class="category-panel page-wrapper">
+      <h2>Busca por categoría</h2>
+      <div class="category-grid">
+        <button data-cat="maquillaje" class="cat-card">Maquillaje</button>
+        <button data-cat="perfumeria" class="cat-card">Perfumería</button>
+        <button data-cat="tecnologia" class="cat-card">Tecnología</button>
+        <button data-cat="accesorios" class="cat-card">Accesorios</button>
+      </div>
+    </section>
+
+    <section class="products-section page-wrapper">
+      <div class="section-header">
+        <div>
+          <h2>Productos destacados</h2>
+          <p>Explora maquillaje, perfumería, celular y accesorios que combinan calidad y estilo en cada detalle.</p>
+        </div>
+      </div>
+      <section id="products" class="products-grid"></section>
+    </section>
+
+    <section class="feature-panel page-wrapper">
+      <article class="feature-card">
+        <strong>Envío rápido</strong>
+        <p>Despachos a todo el país con seguimiento y entrega segura.</p>
+      </article>
+      <article class="feature-card">
+        <strong>Pago flexible</strong>
+        <p>Nequi, contra entrega o pago por transferencia. Tú eliges.</p>
+      </article>
+      <article class="feature-card">
+        <strong>Soporte por WhatsApp</strong>
+        <p>Ordena rápido y recibe confirmación inmediata por WhatsApp.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="page-footer page-wrapper">
+    <div>Conéctate con nosotros: <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></div>
+    <div>Tel/WhatsApp: <a id="whatsappLink" href="#">Enviar WhatsApp</a></div>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
