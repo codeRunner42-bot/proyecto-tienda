@@ -39,7 +39,7 @@ document.addEventListener('click',e=>{ if(e.target.matches('.cat-btn')){filterCa
 
 document.getElementById('whatsappLink').addEventListener('click', e => {
   e.preventDefault();
-  const number = typeof PHONE !== 'undefined' ? PHONE : '573022880520';
+  const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
   const text = encodeURIComponent('¡Hola! Me gustaría recibir más información sobre sus productos.');
   const url = `https://wa.me/${number}?text=${text}`;
   window.open(url, '_blank');

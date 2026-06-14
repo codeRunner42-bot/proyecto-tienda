@@ -44,7 +44,7 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
     const itemsText = checkoutItems.map(i=>`${i.name} x${i.qty} - ${formatCurrency(i.price*i.qty)}`).join('%0A');
     const paymentText = payment==='nequi' ? 'Pago con Nequi (enviar comprobante al WhatsApp)' : 'Pago contra entrega (pagar al recibir)';
     const message = encodeURIComponent(`Nuevo pedido\nPedido ID: ${order.id}\nCliente: ${buyer.firstName} ${buyer.lastName}\nTel: ${buyer.phone}\nDirección: ${buyer.address || '-'}\nMétodo de pago: ${paymentText}\n\nProductos:\n${itemsText}\n\nTotal: ${formatCurrency(total)}`);
-    const number = typeof PHONE !== 'undefined' ? PHONE : '573022880520';
+    const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
     const url = `https://wa.me/${number}?text=${message}`;
 
     let cart = JSON.parse(localStorage.getItem('cart')||'[]');
