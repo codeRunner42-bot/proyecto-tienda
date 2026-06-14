@@ -1,87 +1,55 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Administración de Productos</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración</title>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="top-bar page-wrapper">
-      <p>Administra el catálogo: agrega, edita, elimina y organiza productos.</p>
+  <div class="page-wrapper">
+    <h1>Gestión de Productos</h1>
+    <div id="adminStatus"></div>
+    
+    <div class="admin-actions">
+      <button id="newProductBtn" class="btn btn-primary">Nuevo Producto</button>
+      <a href="admin-orders.html" class="btn btn-secondary">Ver Pedidos</a>
+      <input type="text" id="searchInput" placeholder="Buscar productos...">
     </div>
 
-    <div class="main-header page-wrapper">
-      <a class="back-btn" href="index.html">← Volver a tienda</a>
-      <a class="brand" href="admin.html">Administración</a>
-      <div class="header-actions">
-        <a class="cart" id="cartBtn" href="cart.html">Carrito (<span id="cartCount">0</span>)</a>
+    <form id="productForm" class="admin-form">
+      <h2 id="formTitle">Agregar producto</h2>
+      <input type="hidden" name="id">
+      <input type="text" name="name" placeholder="Nombre" required>
+      <input type="text" name="category" placeholder="Categoría" required>
+      <input type="number" name="price" placeholder="Precio" step="0.01" required>
+      <input type="number" name="stock" placeholder="Stock" required>
+      <input type="text" name="image" placeholder="URL Imagen (opcional)">
+      <div class="file-input">
+        <label>O subir imagen:</label>
+        <input type="file" id="imageUpload" accept="image/*">
       </div>
-    </div>
-  </header>
-
-  <main class="page-main">
-    <section class="page-header page-wrapper">
-      <div>
-        <h2>Panel de Administración</h2>
-        <p>Gestiona productos directamente desde la base de datos local. Cambia stock, precio, descripción e imagen.</p>
+      <textarea name="description" placeholder="Descripción"></textarea>
+      <div class="form-buttons">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" id="cancelEdit" class="btn btn-secondary">Cancelar</button>
       </div>
-    </section>
+    </form>
 
-    <section class="page-wrapper admin-panel">
-      <div class="admin-header">
-        <div class="admin-actions">
-          <button class="btn btn-secondary" id="newProductBtn">Nuevo producto</button>
-          <a class="btn btn-primary" href="admin-orders.html">Ver pedidos</a>
-        </div>
-        <input id="searchInput" type="search" placeholder="Buscar por nombre o categoría" />
-      </div>
-      <div id="adminStatus" class="message"></div>
-      <div class="admin-grid">
-        <div class="admin-table-wrapper">
-          <table class="admin-table" id="adminList">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-
-        <div class="admin-form-wrapper">
-          <form id="productForm" class="admin-form">
-            <h3 id="formTitle">Agregar producto</h3>
-            <input type="hidden" name="id" />
-            <label>Nombre*<input name="name" required></label>
-            <label>Categoría*<input name="category" required></label>
-            <label>Precio*<input name="price" type="number" step="0.01" min="0" required></label>
-            <label>Stock<input name="stock" type="number" min="0"></label>
-            <label>Imagen URL<input name="image" type="url"></label>
-            <label>Subir imagen<input id="imageUpload" type="file" accept="image/*"></label>
-            <label>Descripción<textarea name="description" rows="4"></textarea></label>
-            <div class="action-row">
-              <button type="submit" class="btn btn-primary">Guardar producto</button>
-              <button type="button" class="btn btn-secondary" id="cancelEdit">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="page-footer page-wrapper">
-    <div>Administración local de productos.</div>
-    <div>Ejecuta el servidor con <code>npm install</code> y <code>npm start</code>.</div>
-  </footer>
-
-  <script src="assets/js/config.js"></script>
+    <table id="adminList" class="admin-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
   <script src="assets/js/admin.js"></script>
 </body>
 </html>
