@@ -1,3 +1,6 @@
+function formatCurrency(n){
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
+}
 let products = [];
 let cart = JSON.parse(localStorage.getItem('cart')||'[]');
 let currentCategory = 'all';
@@ -24,7 +27,7 @@ function addToCart(id){
 }
 
 function renderProducts(list){
-  productsEl.innerHTML = list.map(p=>`<article class="product"><img src="${p.image}" alt="${p.name}"><h3>${p.name}</h3><p>${p.description}</p><div class="price">$${p.price.toFixed(2)}</div><button onclick="addToCart('${p.id}')">Añadir</button></article>`).join('');
+  productsEl.innerHTML = list.map(p=>`<article class="product"><img src="${p.image}" alt="${p.name}"><h3>${p.name}</h3><p>${p.description}</p><div class="price">${formatCurrency(p.price)}</div><button onclick="addToCart('${p.id}')">Añadir</button></article>`).join('');
 }
 
 function updateDisplay() {

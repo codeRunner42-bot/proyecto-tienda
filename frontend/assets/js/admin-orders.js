@@ -1,5 +1,8 @@
 const ordersTableBody = document.querySelector('#ordersTable tbody');
 const orderSearch = document.getElementById('orderSearch');
+function formatCurrency(n){
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
+}
 const orderStatus = document.getElementById('orderStatus');
 let allOrders = [];
 
@@ -33,7 +36,7 @@ function renderOrders(orders) {
         <td>${order.id}</td>
         <td>${order.buyer.firstName} ${order.buyer.lastName}</td>
         <td>${order.buyer.phone}</td>
-        <td>$${Number(order.total).toFixed(2)}</td>
+        <td>${formatCurrency(order.total)}</td>
         <td>${order.payment}</td>
         <td>${order.status}</td>
         <td>${new Date(order.createdAt).toLocaleString()}</td>
@@ -97,6 +100,11 @@ orderSearch.addEventListener('input', () => {
     );
   });
   renderOrders(filtered);
+});
+
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+  localStorage.removeItem('adminToken');
+  location.href = 'admin-login.html';
 });
 
 fetchOrders();

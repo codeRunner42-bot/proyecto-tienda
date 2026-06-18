@@ -14,7 +14,7 @@
     "category": "perfumeria",
     "price": 150000,
     "stock": 5,
-    "description": "Amaderada especiada, unisex, seductora y  misteriosa.\nmezcla de vainilla, azafrán y la riqueza del OUD genera una estela magnética, duradera y sofisticada. Ideal para climas fríos y ocasiones especiales.",
+    "description": "Amaderada especiada, unisex, seductora y misteriosa.\nmezcla de vainilla, azafrán y la riqueza del OUD genera una estela magnética, duradera y sofisticada. Ideal para climas fríos y ocasiones especiales.",
     "image": "https://cdn.valmara.co/58292-large_default/perfume-unisex-orientica-oud-safron-de-al-haramain-100-ml-edp.webp"
   },
   {
@@ -39,7 +39,7 @@
     "id": "p5",
     "name": "Diadema Air Pro Max",
     "category": "accesorios",
-    "price": 59.99,
+    "price": 240000,
     "stock": 4,
     "description": "Diadema con cancelación de ruido.",
     "image": "https://via.placeholder.com/400x300?text=Diadema"
@@ -48,7 +48,7 @@
     "id": "p6",
     "name": "Bálsamo Labial Natural",
     "category": "cuidado personal",
-    "price": 4.5,
+    "price": 18000,
     "stock": 25,
     "description": "Hidratación suave para labios secos.",
     "image": "https://via.placeholder.com/400x300?text=Balsamo"
@@ -57,7 +57,7 @@
     "id": "p7",
     "name": "Serum Vitamina C",
     "category": "maquillaje",
-    "price": 18,
+    "price": 72000,
     "stock": 12,
     "description": "Suero iluminador para tu piel.",
     "image": "https://via.placeholder.com/400x300?text=Serum"
@@ -66,7 +66,7 @@
     "id": "p8",
     "name": "Set de Brochas",
     "category": "maquillaje",
-    "price": 34.95,
+    "price": 140000,
     "stock": 15,
     "description": "Brochas profesionales para rostro y ojos.",
     "image": "https://via.placeholder.com/400x300?text=Brochas"
@@ -75,7 +75,7 @@
     "id": "p9",
     "name": "Crema Hidratante",
     "category": "cuidado personal",
-    "price": 22,
+    "price": 88000,
     "stock": 18,
     "description": "Crema diaria para piel suave.",
     "image": "https://via.placeholder.com/400x300?text=Crema"
@@ -84,7 +84,7 @@
     "id": "p10",
     "name": "Cepillo Facial Sónico",
     "category": "cuidado personal",
-    "price": 45,
+    "price": 180000,
     "stock": 6,
     "description": "Limpieza profunda con vibración suave.",
     "image": "https://via.placeholder.com/400x300?text=Cepillo"
@@ -93,7 +93,7 @@
     "id": "p11",
     "name": "Batería Externa 10000mAh",
     "category": "tecnologia",
-    "price": 25.99,
+    "price": 100000,
     "stock": 14,
     "description": "Carga rápida para varios dispositivos.",
     "image": "https://via.placeholder.com/400x300?text=PowerBank"
@@ -102,7 +102,7 @@
     "id": "p12",
     "name": "Auriculares Gaming RGB",
     "category": "tecnologia",
-    "price": 79.99,
+    "price": 320000,
     "stock": 8,
     "description": "Sonido envolvente con micrófono.",
     "image": "https://via.placeholder.com/400x300?text=Gaming"
@@ -111,7 +111,7 @@
     "id": "p13",
     "name": "Mascarilla Facial de Arcilla",
     "category": "perfumeria",
-    "price": 8.99,
+    "price": 36000,
     "stock": 20,
     "description": "Renueva y purifica tu piel.",
     "image": "https://via.placeholder.com/400x300?text=Mascarilla"
@@ -120,7 +120,7 @@
     "id": "p14",
     "name": "Set de cuidado de uñas",
     "category": "accesorios",
-    "price": 15,
+    "price": 60000,
     "stock": 9,
     "description": "Herramientas completas para manicure.",
     "image": "https://via.placeholder.com/400x300?text=Uñas"
@@ -129,7 +129,7 @@
     "id": "p15",
     "name": "Perfume Amaderado",
     "category": "perfumeria",
-    "price": 34,
+    "price": 136000,
     "stock": 7,
     "description": "Aroma elegante para el día o la noche.",
     "image": "https://via.placeholder.com/400x300?text=PerfumeAmaderado"
@@ -138,7 +138,7 @@
     "id": "p16",
     "name": "Audífonos Over-Ear",
     "category": "tecnologia",
-    "price": 59,
+    "price": 236000,
     "stock": 10,
     "description": "Cómodos y con sonido claro.",
     "image": "https://via.placeholder.com/400x300?text=Audifonos"
@@ -147,7 +147,7 @@
     "id": "p17",
     "name": "Kit de Esmalte Semipermanente",
     "category": "accesorios",
-    "price": 27.5,
+    "price": 110000,
     "stock": 11,
     "description": "Colores intensos y duraderos.",
     "image": "https://via.placeholder.com/400x300?text=Esmalte"
@@ -156,7 +156,7 @@
     "id": "p18",
     "name": "Set de Masajes Relax",
     "category": "cuidado personal",
-    "price": 39.99,
+    "price": 160000,
     "stock": 5,
     "description": "Aromaterapia y relajación en casa.",
     "image": "https://via.placeholder.com/400x300?text=Masajes"

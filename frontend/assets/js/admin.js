@@ -1,5 +1,8 @@
 const apiUrl = '/api/products';
 const adminStatus = document.getElementById('adminStatus');
+function formatCurrency(n){
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
+}
 const adminListBody = document.querySelector('#adminList tbody');
 const searchInput = document.getElementById('searchInput');
 const productForm = document.getElementById('productForm');
@@ -56,7 +59,7 @@ function renderProductTable(products) {
         <td><img src="${imgSrc}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);"></td>
         <td>${product.name}</td>
         <td>${product.category}</td>
-        <td>${Number(product.price).toFixed(2)}</td>
+        <td>${formatCurrency(product.price)}</td>
         <td>${product.stock ?? 0}</td>
         <td>
           <button class="btn btn-secondary editBtn">Editar</button>
@@ -221,6 +224,11 @@ searchInput.addEventListener('input', () => {
 
 newProductBtn.addEventListener('click', resetForm);
 cancelEditBtn.addEventListener('click', resetForm);
+
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+  localStorage.removeItem('adminToken');
+  location.href = 'admin-login.html';
+});
 
 if (requireLogin()) {
   fetchProducts();

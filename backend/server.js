@@ -223,6 +223,30 @@ app.post('/api/orders', async (req, res) => {
       return res.status(400).json({ error: 'buyer y items son obligatorios.' });
     }
 
+    const products = await readProducts();
+    const itemsToUpdate = [];
+
+    for (const item of payload.items) {
+      const product = products.find((p) => p.id === String(item.id));
+      if (!product) {
+        return res.status(400).json({ error: `El producto "${item.name || item.id}" ya no existe.` });
+      }
+      if (typeof product.stock === 'number') {
+        if (product.stock < Number(item.qty)) {
+          return res.status(400).json({
+            error: `Stock insuficiente para ${product.name}. Disponible: ${product.stock}, solicitado: ${item.qty}`
+          });
+        }
+        itemsToUpdate.push({ product, qty: Number(item.qty) });
+      }
+    }
+
+    // Descontar stock
+    for (const update of itemsToUpdate) {
+      update.product.stock -= update.qty;
+    }
+    await writeProducts(products);
+
     const total = Number(payload.total || payload.items.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty || 0)), 0));
     const order = {
       id: generateOrderId(),

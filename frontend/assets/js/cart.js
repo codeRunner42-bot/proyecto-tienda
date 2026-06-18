@@ -1,4 +1,4 @@
-function formatCurrency(n){return '$'+Number(n).toFixed(2)}
+function formatCurrency(n){return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n)}
 let cart = JSON.parse(localStorage.getItem('cart')||'[]');
 const cartList = document.getElementById('cartList');
 const cartCountEl = document.getElementById('cartCount');
