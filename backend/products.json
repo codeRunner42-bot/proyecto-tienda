@@ -14,7 +14,7 @@
     "category": "perfumeria",
     "price": 150000,
     "stock": 5,
-    "description": "Amaderada especiada, unisex, seductora y misteriosa.\nmezcla de vainilla, azafrán y la riqueza del OUD genera una estela magnética, duradera y sofisticada. Ideal para climas fríos y ocasiones especiales.",
+    "description": "Una majestuosa y adictiva mezcla de azafrán especiado y maderas de oud preciosas, envueltas en un fondo de ámbar gris que huele a oro, misterio y realeza.",
     "image": "https://cdn.valmara.co/58292-large_default/perfume-unisex-orientica-oud-safron-de-al-haramain-100-ml-edp.webp"
   },
   {
@@ -38,11 +38,11 @@
   {
     "id": "p5",
     "name": "Diadema Air Pro Max",
-    "category": "accesorios",
-    "price": 240000,
-    "stock": 4,
+    "category": "tecnologia",
+    "price": 120000,
+    "stock": 2,
     "description": "Diadema con cancelación de ruido.",
-    "image": "https://via.placeholder.com/400x300?text=Diadema"
+    "image": "https://luegopagocdn.azureedge.net/content-process/products-images/prod/2928/51473b38-608c-434f-993d-d2cc43aa1def.webp"
   },
   {
     "id": "p6",
@@ -91,30 +91,12 @@
   },
   {
     "id": "p11",
-    "name": "Batería Externa 10000mAh",
+    "name": "Cargador samsung 25W",
     "category": "tecnologia",
-    "price": 100000,
-    "stock": 14,
-    "description": "Carga rápida para varios dispositivos.",
-    "image": "https://via.placeholder.com/400x300?text=PowerBank"
-  },
-  {
-    "id": "p12",
-    "name": "Auriculares Gaming RGB",
-    "category": "tecnologia",
-    "price": 320000,
-    "stock": 8,
-    "description": "Sonido envolvente con micrófono.",
-    "image": "https://via.placeholder.com/400x300?text=Gaming"
-  },
-  {
-    "id": "p13",
-    "name": "Mascarilla Facial de Arcilla",
-    "category": "perfumeria",
-    "price": 36000,
-    "stock": 20,
-    "description": "Renueva y purifica tu piel.",
-    "image": "https://via.placeholder.com/400x300?text=Mascarilla"
+    "price": 25000,
+    "stock": 1,
+    "description": "Carga rápida para varios dispositivos con entrada tipo C",
+    "image": "https://http2.mlstatic.com/D_NQ_NP_880052-MCO110523548888_052026-O.webp"
   },
   {
     "id": "p14",
@@ -127,12 +109,12 @@
   },
   {
     "id": "p15",
-    "name": "Perfume Amaderado",
+    "name": "Valentino Born In Roma intense",
     "category": "perfumeria",
-    "price": 136000,
-    "stock": 7,
-    "description": "Aroma elegante para el día o la noche.",
-    "image": "https://via.placeholder.com/400x300?text=PerfumeAmaderado"
+    "price": 100000,
+    "stock": 2,
+    "description": "Una explosión nocturna y ultra seductora de vainilla cremosa de Bourbon y lavanda elegante, asentadas sobre un fondo amaderado profundamente magnético.",
+    "image": "https://attoperfumes.com.co/cdn/shop/files/Valentino-Uomo-Born-in-roma-intense.jpg?v=17393145864555"
   },
   {
     "id": "p16",
@@ -154,12 +136,12 @@
   },
   {
     "id": "p18",
-    "name": "Set de Masajes Relax",
+    "name": "kit viajero de centella asiatica",
     "category": "cuidado personal",
-    "price": 160000,
-    "stock": 5,
-    "description": "Aromaterapia y relajación en casa.",
-    "image": "https://via.placeholder.com/400x300?text=Masajes"
+    "price": 300000,
+    "stock": 1,
+    "description": "kit de cuiado facial portatil",
+    "image": "/uploads/mqecnw2s-436230939.jpg"
   },
   {
     "id": "p19",
@@ -169,5 +151,41 @@
     "stock": 2,
     "description": "Carga Ultra Rápida.\nTecnología Inteligente.\nMáxima versatilidad.\nSeguridad avanzada:.",
     "image": "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcRCQOEkvi-EgmGSww9u2YW2HyAqy-2hH1f8jbAduoVvEP6YfhCOwp1g1o-ozC2DYFJVuXPni_gJsgCngoJJNf19GsyLBJXc4Qy8q1B5pBmeuM_WC3eQQZLT6Q"
+  },
+  {
+    "id": "pmqi2uos13yz",
+    "name": "Scandal Le Perfum",
+    "category": "perfumeria",
+    "price": 120000,
+    "stock": 2,
+    "description": "Un golpe dulce, magnético y oscuro de caramelo tostado y maderas finas que huele a victory nocturna.",
+    "image": "https://facescr.vtexassets.com/arquivos/ids/181715/8435415065207_1.jpg?v=638210575647200000"
+  },
+  {
+    "id": "pmqi2zv5n7nz",
+    "name": "sauvage dior",
+    "category": "perfumeria",
+    "price": 110000,
+    "stock": 2,
+    "description": "Frescura cítrica extrema y pimienta noble que se funden en una base misteriosa, limpia y ultra sensual de vainilla y maderas.",
+    "image": "https://lmd.com.co/cdn/shop/files/dior_sauvage_eau_de_parfum.webp?v=1732716747&width=416"
+  },
+  {
+    "id": "pmqi36l9q5av",
+    "name": "Montale Arabians Tonka",
+    "category": "perfumeria",
+    "price": 130000,
+    "stock": 1,
+    "description": "Un torbellino ultra adictivo de azúcar tostada, haba tonka y maderas de oud que envuelve la piel con un lujo árabe imponente y eterno.",
+    "image": "https://www.eleganzaperfumeria.com/cdn/shop/files/arabians-tonka_600x600.webp?v=1731188772"
+  },
+  {
+    "id": "pmqi3akz29n",
+    "name": "Armaf Club De Nuit Intense Man",
+    "category": "perfumeria",
+    "price": 130000,
+    "stock": 2,
+    "description": "Una adictiva combinación de piña fresca y maderas ahumadas con un fondo de ámbar gris que proyecta pura masculinidad, lujo y poder.",
+    "image": "https://exitocol.vtexassets.com/arquivos/ids/23602302/perfume-armaf-club-de-nuit-intense-man-hombre-locion-105ml.jpg?v=638563955996100000"
   }
 ]
