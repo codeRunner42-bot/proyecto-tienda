@@ -3,12 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración</title>
+  <title>Panel de Administración - Ale Beauty Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
   <div class="page-wrapper">
-    <h1>Gestión de Productos</h1>
+    <h1 class="admin-page-title">Gestión de Productos</h1>
+    
+    <!-- TARJETAS DE ESTADISTICAS -->
+    <div class="admin-stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <span class="stat-card-title">Total Facturado</span>
+        <span class="stat-card-val" id="statRevenue">$0</span>
+        <span class="stat-card-icon">💰</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-title">Pedidos Recibidos</span>
+        <span class="stat-card-val" id="statOrders">0</span>
+        <span class="stat-card-icon">📦</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-title">Ticket Promedio</span>
+        <span class="stat-card-val" id="statAvgTicket">$0</span>
+        <span class="stat-card-icon">📈</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card-title">Bajo Stock (≤2)</span>
+        <span class="stat-card-val" id="statLowStock">0</span>
+        <span class="stat-card-icon">⚠️</span>
+      </div>
+    </div>
+
     <div id="adminStatus"></div>
     
     <div class="admin-actions">
@@ -29,9 +57,10 @@
       <input type="text" name="category" placeholder="Categoría" required>
       <input type="number" name="price" placeholder="Precio" step="0.01" required>
       <input type="number" name="stock" placeholder="Stock" required>
-      <input type="text" name="image" placeholder="URL Imagen (opcional)">
+      <input type="text" name="image" placeholder="URL Imagen Principal (opcional)">
+      <input type="text" name="images" placeholder="URLs de imágenes secundarias (separadas por comas, opcional)">
       <div class="file-input">
-        <label>O subir imagen:</label>
+        <label>O subir imagen principal:</label>
         <input type="file" id="imageUpload" accept="image/*">
       </div>
       <textarea name="description" placeholder="Descripción"></textarea>
@@ -56,6 +85,9 @@
       <tbody></tbody>
     </table>
   </div>
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
   <script src="assets/js/admin.js"></script>
 </body>
 </html>

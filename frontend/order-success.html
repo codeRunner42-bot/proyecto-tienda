@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>¡Pedido Recibido! - Ale Beauty Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .invoice-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      margin: 40px auto;
+      max-width: 780px;
+    }
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 24px;
+      margin-bottom: 24px;
+    }
+    .invoice-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .invoice-meta {
+      text-align: right;
+    }
+    .invoice-meta h3 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .invoice-meta p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .invoice-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    .invoice-block h4 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .invoice-block p {
+      margin: 0 0 6px;
+      font-weight: 600;
+    }
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    .invoice-table th, .invoice-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(77, 14, 46, 0.05);
+    }
+    .invoice-table th {
+      background: var(--bg-secondary);
+      color: var(--accent-strong);
+      font-weight: 700;
+    }
+    .invoice-table tr:last-child td {
+      border-bottom: none;
+    }
+    .invoice-total-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      margin-bottom: 30px;
+    }
+    .invoice-total-row {
+      display: flex;
+      justify-content: space-between;
+      width: 280px;
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+    .invoice-total-row.grand-total {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      border-top: 1px solid var(--border-color);
+      padding-top: 8px;
+      margin-top: 4px;
+    }
+    .payment-instructions-box {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 1px dashed var(--accent);
+      margin-bottom: 30px;
+    }
+    .payment-instructions-box h4 {
+      margin-bottom: 10px;
+      color: var(--accent-strong);
+    }
+    .payment-instructions-box p {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+    }
+    .payment-instructions-box p:last-child {
+      margin-bottom: 0;
+    }
+    .invoice-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .site-header, .page-footer, .invoice-actions, .payment-instructions-box, .top-bar {
+        display: none !important;
+      }
+      .invoice-card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+      }
+      .invoice-table th {
+        background: #f5f5f5 !important;
+        color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="top-bar page-wrapper">
+      <p>¡Pedido Recibido! Gracias por tu compra</p>
+    </div>
+
+    <div class="main-header page-wrapper">
+      <div class="header-side"></div>
+      <a class="brand-logo" href="index.html">
+        <div class="logo-badge">AB</div>
+        <span class="logo-text">Ale Beauty Art</span>
+      </a>
+      <div class="header-actions">
+        <button class="dark-mode-toggle" id="themeToggle" title="Cambiar Tema">🌙</button>
+        <a class="cart" id="cartBtn" href="cart.html">
+          <span class="cart-icon">🛒</span>
+          <span class="cart-text">Carrito (<span id="cartCount">0</span>)</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main page-wrapper">
+    <div class="invoice-card" id="invoiceCard">
+      <div class="invoice-header">
+        <div class="invoice-logo">
+          <div class="logo-badge" style="width:50px; height:50px; font-size:1.4rem;">AB</div>
+          <span class="logo-text" style="font-size:1.3rem;">Ale Beauty Art</span>
+        </div>
+        <div class="invoice-meta">
+          <h3>FACTURA SIMPLIFICADA</h3>
+          <p>Pedido ID: <strong id="invOrderId" style="color:var(--accent);">Cargando...</strong></p>
+          <p>Fecha: <span id="invDate">Cargando...</span></p>
+        </div>
+      </div>
+
+      <div class="invoice-details-grid">
+        <div class="invoice-block">
+          <h4>Cliente</h4>
+          <p id="invCustomerName">Cargando...</p>
+          <p>Teléfono: <span id="invCustomerPhone">Cargando...</span></p>
+        </div>
+        <div class="invoice-block">
+          <h4>Envío & Pago</h4>
+          <p>Dirección: <span id="invCustomerAddress">Cargando...</span></p>
+          <p>Método de Pago: <span id="invPaymentMethod" style="text-transform: capitalize;">Cargando...</span></p>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Precio Unitario</th>
+            <th>Cantidad</th>
+            <th style="text-align: right;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceTableBody">
+          <!-- Dinámico -->
+        </tbody>
+      </table>
+
+      <div class="invoice-total-section">
+        <div class="invoice-total-row">
+          <span>Subtotal:</span>
+          <span id="invSubtotal">$0</span>
+        </div>
+        <div class="invoice-total-row grand-total">
+          <span>Total:</span>
+          <span id="invTotal">$0</span>
+        </div>
+      </div>
+
+      <div class="payment-instructions-box" id="nequiBox" style="display:none;">
+        <h4>Instrucciones para Pago con Nequi 📱</h4>
+        <p>Para procesar tu pedido, realiza la transferencia del total a nuestra cuenta Nequi:</p>
+        <p><strong>Nequi Celular:</strong> 302 288 0520</p>
+        <p>Una vez realizado el pago, por favor envía el comprobante de transferencia al chat de WhatsApp haciendo clic en el botón inferior o escribiendo a nuestro número.</p>
+      </div>
+
+      <div class="invoice-actions">
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir o Guardar PDF</button>
+        <button class="btn btn-primary" id="successWaBtn">💬 Enviar Comprobante por WhatsApp</button>
+        <button class="btn btn-secondary" onclick="location.href='index.html'">Volver a la tienda</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-footer page-wrapper">
+    <div>Conéctate con nosotros: <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></div>
+  </footer>
+
+  <script>
+    // Theme Switcher Logic
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    function applySavedTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (themeToggle) themeToggle.textContent = '☀️';
+      } else {
+        body.classList.remove('dark-mode');
+        if (themeToggle) themeToggle.textContent = '🌙';
+      }
+    }
+    themeToggle?.addEventListener('click', () => {
+      if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+        themeToggle.textContent = '🌙';
+      } else {
+        body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+        themeToggle.textContent = '☀️';
+      }
+    });
+    applySavedTheme();
+
+    function formatCurrency(n){
+      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
+    }
+
+    // Load invoice data from query params or localStorage
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('orderId');
+
+    if (!orderId) {
+      alert('Código de pedido no encontrado.');
+      location.href = 'index.html';
+    }
+
+    // Fetch order details from API
+    fetch(`/api/public/orders/${orderId}`)
+      .then(r => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
+      .then(order => {
+        document.getElementById('invOrderId').textContent = order.id;
+        document.getElementById('invDate').textContent = new Date(order.createdAt).toLocaleString();
+        document.getElementById('invCustomerName').textContent = `${order.buyer.firstName} ${order.buyer.lastName}`;
+        document.getElementById('invCustomerPhone').textContent = localStorage.getItem('last_phone') || '—';
+        document.getElementById('invCustomerAddress').textContent = localStorage.getItem('last_address') || '—';
+        
+        let paymentType = order.payment;
+        if (paymentType === 'nequi') {
+          paymentType = 'Nequi / Transferencia';
+          document.getElementById('nequiBox').style.display = 'block';
+        } else if (paymentType === 'contra_entrega') {
+          paymentType = 'Pago Contra Entrega';
+        }
+        document.getElementById('invPaymentMethod').textContent = paymentType;
+
+        // Populate table
+        const tbody = document.getElementById('invoiceTableBody');
+        tbody.innerHTML = order.items.map(item => `
+          <tr>
+            <td><strong>${item.name}</strong></td>
+            <td>${formatCurrency(item.price)}</td>
+            <td>${item.qty}</td>
+            <td style="text-align: right; font-weight:700;">${formatCurrency(item.price * item.qty)}</td>
+          </tr>
+        `).join('');
+
+        document.getElementById('invSubtotal').textContent = formatCurrency(order.total);
+        document.getElementById('invTotal').textContent = formatCurrency(order.total);
+
+        // WhatsApp redirect btn handler
+        document.getElementById('successWaBtn').addEventListener('click', () => {
+          const itemsText = order.items.map(i=>`${i.name} x${i.qty} - ${formatCurrency(i.price*i.qty)}`).join('\n');
+          const paymentText = order.payment==='nequi' ? 'Pago con Nequi (enviando comprobante)' : 'Pago contra entrega (pagar al recibir)';
+          const customerPhone = localStorage.getItem('last_phone') || '—';
+          const customerAddress = localStorage.getItem('last_address') || '—';
+          
+          const message = encodeURIComponent(`¡Hola Ale Beauty Art! Adjunto mi comprobante o confirmo mi pedido.\n\nPedido ID: ${order.id}\nCliente: ${order.buyer.firstName} ${order.buyer.lastName}\nTel: ${customerPhone}\nDirección: ${customerAddress}\nMétodo de pago: ${paymentText}\n\nProductos:\n${itemsText}\n\nTotal: ${formatCurrency(order.total)}`);
+          const number = '573022880520';
+          const url = `https://wa.me/${number}?text=${message}`;
+          window.open(url, '_blank');
+        });
+      })
+      .catch(() => {
+        alert('Error al obtener los detalles de la factura.');
+        location.href = 'index.html';
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rastrear Pedido - Ale Beauty Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .tracking-container {
+      max-width: 680px;
+      margin: 40px auto;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-lg);
+      padding: 40px;
+    }
+    .tracking-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    .tracking-form label {
+      font-weight: 700;
+      color: var(--accent-strong);
+    }
+    .tracking-form input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      outline: none;
+      font-weight: 600;
+      transition: var(--transition-fast);
+    }
+    .tracking-form input:focus {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-glow);
+    }
+    .tracking-form button {
+      background: var(--gradient-brand);
+      color: #ffffff;
+      padding: 14px;
+      font-weight: 800;
+      border-radius: var(--radius-round);
+      box-shadow: 0 10px 20px rgba(77, 14, 46, 0.12);
+    }
+    .tracking-result {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+      border-top: 1px dashed var(--border-color);
+      padding-top: 30px;
+    }
+    
+    /* Elegant Visual Stepper Timeline */
+    .timeline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 40px 0;
+      padding: 0 10px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--bg-secondary);
+      z-index: 1;
+    }
+    .timeline-progress {
+      position: absolute;
+      top: 24px;
+      left: 0;
+      height: 4px;
+      background: var(--accent);
+      z-index: 2;
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 3;
+      width: 80px;
+    }
+    .step-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 3px solid var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      transition: var(--transition-normal);
+      box-shadow: var(--shadow-sm);
+    }
+    .step.active .step-circle {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      box-shadow: var(--shadow-glow);
+    }
+    .step.completed .step-circle {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+    .step-label {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .step.active .step-label {
+      color: var(--accent);
+    }
+    .step.completed .step-label {
+      color: var(--accent-strong);
+    }
+    .order-status-pill {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: var(--radius-round);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 20px;
+    }
+    .status-pending { background: #ffeaa7; color: #d63031; }
+    .status-processing { background: #dfe6e9; color: #2d3436; }
+    .status-shipped { background: #74b9ff; color: #0984e3; }
+    .status-delivered { background: #55efc4; color: #00b894; }
+    .status-cancelled { background: #fab1a0; color: #e17055; }
+    
+    .tracking-details {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      margin-top: 24px;
+    }
+    .tracking-details div {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(77, 14, 46, 0.03);
+    }
+    .tracking-details div:last-child {
+      border-bottom: none;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="top-bar page-wrapper">
+      <p>Rastrea el envío de tus cosméticos y tecnología en tiempo real</p>
+    </div>
+
+    <div class="main-header page-wrapper">
+      <a class="back-btn" href="index.html">← Volver</a>
+      <a class="brand-logo" href="index.html">
+        <div class="logo-badge">AB</div>
+        <span class="logo-text">Ale Beauty Art</span>
+      </a>
+      <div class="header-actions">
+        <button class="dark-mode-toggle" id="themeToggle" title="Cambiar Tema">🌙</button>
+        <a class="cart" id="cartBtn" href="cart.html">
+          <span class="cart-icon">🛒</span>
+          <span class="cart-text">Carrito (<span id="cartCount">0</span>)</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main page-wrapper">
+    <section class="page-header">
+      <h2>Rastrear Pedido</h2>
+      <p>Ingresa el código único de tu pedido para ver su estado e información de envío.</p>
+    </section>
+
+    <div class="tracking-container">
+      <form class="tracking-form" id="trackingForm">
+        <label>Código del Pedido (ID):
+          <input type="text" id="orderIdInput" placeholder="Ej: o2ki3asf" required>
+        </label>
+        <button type="submit" class="btn btn-primary">Buscar Pedido</button>
+      </form>
+
+      <!-- Div de resultados -->
+      <div class="tracking-result" id="trackingResult">
+        <div style="text-align: center;">
+          <span class="order-status-pill" id="orderStatusPill">Cargando...</span>
+          <h3 style="font-size: 1.4rem;">Pedido <span id="resOrderId" style="color:var(--accent);">—</span></h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Fecha de compra: <span id="resOrderDate">—</span></p>
+        </div>
+
+        <!-- Línea de tiempo visual -->
+        <div class="timeline" id="timelineContainer">
+          <div class="timeline-progress" id="timelineProgress"></div>
+          <div class="step" id="step-pending">
+            <div class="step-circle">1</div>
+            <div class="step-label">Recibido</div>
+          </div>
+          <div class="step" id="step-processing">
+            <div class="step-circle">2</div>
+            <div class="step-label">Preparando</div>
+          </div>
+          <div class="step" id="step-shipped">
+            <div class="step-circle">3</div>
+            <div class="step-label">Despachado</div>
+          </div>
+          <div class="step" id="step-delivered">
+            <div class="step-circle">4</div>
+            <div class="step-label">Entregado</div>
+          </div>
+        </div>
+
+        <div class="tracking-details">
+          <div>
+            <span>Comprador:</span>
+            <strong id="resCustomerName">—</strong>
+          </div>
+          <div>
+            <span>Método de Pago:</span>
+            <span id="resPayment">—</span>
+          </div>
+          <div>
+            <span>Artículos:</span>
+            <span id="resItemsCount" style="font-weight:700;">0</span>
+          </div>
+          <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 6px;">
+            <span>Total:</span>
+            <strong id="resTotal" style="color:var(--accent); font-size:1.15rem;">$0</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <footer class="page-footer page-wrapper">
+    <div>Conéctate con nosotros: <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></div>
+  </footer>
+
+  <script>
+    // Theme Switcher Logic
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    function applySavedTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (themeToggle) themeToggle.textContent = '☀️';
+      } else {
+        body.classList.remove('dark-mode');
+        if (themeToggle) themeToggle.textContent = '🌙';
+      }
+    }
+    themeToggle?.addEventListener('click', () => {
+      if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+        themeToggle.textContent = '🌙';
+      } else {
+        body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+        themeToggle.textContent = '☀️';
+      }
+    });
+    applySavedTheme();
+
+    function formatCurrency(n){
+      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
+    }
+
+    // Global Toast System
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let icon = 'ℹ️';
+      if (type === 'success') icon = '✓';
+      if (type === 'error') icon = '⚠️';
+      
+      toast.innerHTML = `
+        <span style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.1rem; font-weight:bold;">${icon}</span>
+          <span>${message}</span>
+        </span>
+        <button class="toast-close">✕</button>
+      `;
+      container.appendChild(toast);
+      
+      const closeBtn = toast.querySelector('.toast-close');
+      closeBtn.addEventListener('click', () => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 400);
+      });
+      
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.classList.add('fade-out');
+          setTimeout(() => toast.remove(), 400);
+        }
+      }, 4000);
+    }
+
+    // Update cart counter on load
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+
+    const trackingForm = document.getElementById('trackingForm');
+    const trackingResult = document.getElementById('trackingResult');
+
+    trackingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('orderIdInput').value.trim();
+      
+      try {
+        const response = await fetch(`/api/public/orders/${id}`);
+        if (!response.ok) {
+          throw new Error('No se encontró ningún pedido con este código. Verifica los caracteres e intenta de nuevo.');
+        }
+        const order = await response.json();
+        
+        // Show result div
+        trackingResult.style.display = 'block';
+        
+        // Map fields
+        document.getElementById('resOrderId').textContent = order.id;
+        document.getElementById('resOrderDate').textContent = new Date(order.createdAt).toLocaleString();
+        document.getElementById('resCustomerName').textContent = `${order.buyer.firstName} ${order.buyer.lastName}`;
+        document.getElementById('resPayment').textContent = order.payment === 'nequi' ? 'Nequi' : 'Pago contra entrega';
+        document.getElementById('resItemsCount').textContent = order.items.reduce((sum, i) => sum + i.qty, 0) + ' artículo(s)';
+        document.getElementById('resTotal').textContent = formatCurrency(order.total);
+        
+        // Set status pill and timeline
+        const status = order.status;
+        const pill = document.getElementById('orderStatusPill');
+        pill.className = 'order-status-pill';
+        
+        // Reset timeline classes
+        const steps = ['pending', 'processing', 'shipped', 'delivered'];
+        steps.forEach(s => {
+          document.getElementById(`step-${s}`).className = 'step';
+        });
+        
+        const progress = document.getElementById('timelineProgress');
+        
+        if (status === 'cancelled') {
+          pill.textContent = 'Cancelado ✕';
+          pill.classList.add('status-cancelled');
+          progress.style.width = '0%';
+        } else {
+          // Normal states
+          if (status === 'pending') {
+            pill.textContent = 'Pendiente 🕒';
+            pill.classList.add('status-pending');
+            document.getElementById('step-pending').classList.add('active');
+            progress.style.width = '0%';
+          } else if (status === 'processing') {
+            pill.textContent = 'Preparando 📦';
+            pill.classList.add('status-processing');
+            document.getElementById('step-pending').classList.add('completed');
+            document.getElementById('step-processing').classList.add('active');
+            progress.style.width = '33%';
+          } else if (status === 'shipped') {
+            pill.textContent = 'Despachado 🚚';
+            pill.classList.add('status-shipped');
+            document.getElementById('step-pending').classList.add('completed');
+            document.getElementById('step-processing').classList.add('completed');
+            document.getElementById('step-shipped').classList.add('active');
+            progress.style.width = '66%';
+          } else if (status === 'delivered') {
+            pill.textContent = 'Entregado 🟢';
+            pill.classList.add('status-delivered');
+            document.getElementById('step-pending').classList.add('completed');
+            document.getElementById('step-processing').classList.add('completed');
+            document.getElementById('step-shipped').classList.add('completed');
+            document.getElementById('step-delivered').classList.add('completed');
+            progress.style.width = '100%';
+          }
+        }
+        
+        showToast('Pedido cargado correctamente.', 'success');
+      } catch (err) {
+        trackingResult.style.display = 'none';
+        showToast(err.message, 'error');
+      }
+    });
+
+    // Check if ID in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlId = urlParams.get('id');
+    if (urlId) {
+      document.getElementById('orderIdInput').value = urlId;
+      trackingForm.dispatchEvent(new Event('submit'));
+    }
+  </script>
+</body>
+</html>

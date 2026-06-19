@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mi Cuenta - Ale Beauty Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .auth-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin: 40px auto;
+      max-width: 900px;
+    }
+    .auth-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-lg);
+      padding: 36px;
+    }
+    .auth-card h3 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+    .auth-card form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .auth-card label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--accent-strong);
+    }
+    .auth-card input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      margin-top: 6px;
+      outline: none;
+      transition: var(--transition-fast);
+    }
+    .auth-card input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(233, 43, 114, 0.15);
+    }
+    .auth-card button {
+      margin-top: 10px;
+      width: 100%;
+      padding: 14px;
+      font-weight: 800;
+      border-radius: var(--radius-round);
+      box-shadow: 0 8px 16px rgba(77, 14, 46, 0.1);
+    }
+    
+    /* Dashboard Profile View */
+    .dashboard-container {
+      display: none;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 32px;
+      margin: 40px auto;
+      max-width: 1100px;
+      animation: fadeIn 0.4s ease-out;
+    }
+    .profile-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      padding: 30px;
+      align-self: start;
+    }
+    .profile-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    .profile-details p {
+      margin: 0 0 12px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .profile-details strong {
+      color: var(--text-main);
+    }
+    .orders-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      padding: 30px;
+    }
+    .orders-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+    
+    .account-order-item {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition-fast);
+    }
+    .account-order-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .order-info-left h4 {
+      font-size: 1.1rem;
+      color: var(--accent-strong);
+      margin-bottom: 4px;
+    }
+    .order-info-left p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .order-info-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .order-status-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: var(--radius-round);
+    }
+    
+    @media (max-width: 820px) {
+      .auth-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+      .dashboard-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="top-bar page-wrapper">
+      <p>Inicia sesión para ver tu historial de compras y realizar seguimiento</p>
+    </div>
+
+    <div class="main-header page-wrapper">
+      <a class="back-btn" href="index.html">← Volver</a>
+      <a class="brand-logo" href="index.html">
+        <div class="logo-badge">AB</div>
+        <span class="logo-text">Ale Beauty Art</span>
+      </a>
+      <div class="header-actions">
+        <button class="dark-mode-toggle" id="themeToggle" title="Cambiar Tema">🌙</button>
+        <a class="cart" id="cartBtn" href="cart.html">
+          <span class="cart-icon">🛒</span>
+          <span class="cart-text">Carrito (<span id="cartCount">0</span>)</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-main page-wrapper">
+    <!-- Vista 1: Login / Registro (Oculto si está autenticado) -->
+    <div class="auth-container" id="authContainer">
+      <div class="auth-card">
+        <h3>Iniciar Sesión</h3>
+        <form id="clientLoginForm">
+          <label>Email:
+            <input type="email" name="email" required placeholder="correo@ejemplo.com">
+          </label>
+          <label>Contraseña:
+            <input type="password" name="password" required placeholder="••••••••">
+          </label>
+          <button type="submit" class="btn btn-primary">Entrar a mi Cuenta</button>
+        </form>
+      </div>
+      
+      <div class="auth-card">
+        <h3>Registrarse</h3>
+        <form id="clientRegisterForm">
+          <label>Nombre*:
+            <input type="text" name="firstName" required placeholder="Juan">
+          </label>
+          <label>Apellidos*:
+            <input type="text" name="lastName" required placeholder="Pérez">
+          </label>
+          <label>Email*:
+            <input type="email" name="email" required placeholder="juan.perez@correo.com">
+          </label>
+          <label>Contraseña*:
+            <input type="password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres">
+          </label>
+          <label>Teléfono (WhatsApp)*:
+            <input type="tel" name="phone" required placeholder="Ej: 3001234567">
+          </label>
+          <label>Dirección de Envío:
+            <input type="text" name="address" placeholder="Calle 123 #45-67, Ciudad">
+          </label>
+          <button type="submit" class="btn btn-secondary" style="border:1px solid var(--border-hover)">Crear Cuenta</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Vista 2: Panel del Cliente (Oculto si no está autenticado) -->
+    <div class="dashboard-container" id="dashboardContainer">
+      <div class="profile-card">
+        <h3>Mi Perfil</h3>
+        <div class="profile-details">
+          <p>Nombre: <strong id="profName">—</strong></p>
+          <p>Email: <strong id="profEmail">—</strong></p>
+          <p>WhatsApp: <strong id="profPhone">—</strong></p>
+          <p>Dirección: <strong id="profAddress">—</strong></p>
+        </div>
+        <hr style="border:none; border-top:1px solid var(--border-color); margin: 20px 0;"/>
+        <button class="btn btn-danger" id="clientLogoutBtn" style="width:100%;">Cerrar Sesión</button>
+      </div>
+      
+      <div class="orders-card">
+        <h3>Historial de Pedidos</h3>
+        <div id="customerOrdersList">
+          <p style="color:var(--text-muted); text-align:center; padding:20px;">No has realizado ningún pedido aún.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <footer class="page-footer page-wrapper">
+    <div>Conéctate con nosotros: <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></div>
+  </footer>
+
+  <script src="assets/js/account.js"></script>
+</body>
+</html>

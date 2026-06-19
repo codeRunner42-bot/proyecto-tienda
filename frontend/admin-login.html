@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Administración</title>
+  <title>Acceso Admin - Ale Beauty Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body class="login-screen">
   <div class="login-card">
-    <a href="index.html" style="display:block; text-align:center; margin-bottom:20px; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:2px;">← Volver a la tienda</a>
+    <a href="index.html" class="admin-back-shop">← Volver a la tienda</a>
     <h1>Acceso Admin</h1>
     <p>Ingresa tus credenciales para gestionar productos y pedidos.</p>
     
@@ -24,6 +27,9 @@
       <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
     </form>
   </div>
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+  
   <script src="assets/js/admin-login.js"></script>
 </body>
 </html>

@@ -3,20 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Checkout - Tienda</title>
+  <title>Finalizar Compra - Ale Beauty Art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
   <header class="site-header">
     <div class="top-bar page-wrapper">
-      <p>Listo para tu compra • Confirmación por WhatsApp • <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></p>
+      <p>Listo para tu compra • <a href="tracking.html">Rastrear Pedido</a> • <a href="account.html">Mi Cuenta</a> • <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></p>
     </div>
 
     <div class="main-header page-wrapper">
       <a class="back-btn" href="cart.html">← Carrito</a>
-      <a class="brand" href="index.html">Tienda</a>
+      <a class="brand-logo" href="index.html">
+        <div class="logo-badge">AB</div>
+        <span class="logo-text">Ale Beauty Art</span>
+      </a>
       <div class="header-actions">
-        <a class="cart" id="cartBtn" href="cart.html">Carrito (<span id="cartCount">0</span>)</a>
+        <button class="dark-mode-toggle" id="themeToggle" title="Cambiar Tema">🌙</button>
+        <a class="cart" id="cartBtn" href="cart.html">
+          <span class="cart-icon">🛒</span>
+          <span class="cart-text">Carrito (<span id="cartCount">0</span>)</span>
+        </a>
       </div>
     </div>
   </header>
@@ -50,6 +60,9 @@
   <footer class="page-footer page-wrapper">
     <div>Conéctate con nosotros: <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></div>
   </footer>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <script src="assets/js/config.js"></script>
   <script src="assets/js/checkout.js"></script>
