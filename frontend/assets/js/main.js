@@ -3,6 +3,16 @@ function formatCurrency(n){
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
 }
 
+function escapeHTML(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Global Toast System
 function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
@@ -150,10 +160,39 @@ function renderSkeletons() {
   `).join('');
 }
 
+
+
+// Render thumbnails in product modal and bind click events
+function renderThumbnails() {
+  const thumbContainer = document.getElementById('modalThumbnails');
+  if (!thumbContainer) return;
+  
+  if (modalActiveImages.length <= 1) {
+    thumbContainer.innerHTML = '';
+    return;
+  }
+  
+  thumbContainer.innerHTML = modalActiveImages.map((imgUrl, idx) => {
+    const activeClass = idx === modalActiveImageIndex ? 'active' : '';
+    return `
+      <img src="${imgUrl}" class="modal-thumb ${activeClass}" data-index="${idx}" />
+    `;
+  }).join('');
+  
+  // Bind click event to each thumbnail
+  thumbContainer.querySelectorAll('.modal-thumb').forEach(thumb => {
+    thumb.addEventListener('click', (e) => {
+      modalActiveImageIndex = Number(e.target.dataset.index);
+      updateModalImage();
+    });
+  });
+}
+
 // Update Modal Image index
 function updateModalImage() {
   if (modalActiveImages.length > 0 && modalImg) {
     modalImg.src = modalActiveImages[modalActiveImageIndex];
+    renderThumbnails();
   }
 }
 
@@ -280,10 +319,10 @@ function loadReviews(productId) {
         return `
           <div style="border-bottom:1px solid var(--border-color); padding-bottom:8px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <strong style="font-size:0.85rem; color:var(--accent-strong);">${r.author}</strong>
+              <strong style="font-size:0.85rem; color:var(--accent-strong);">${escapeHTML(r.author)}</strong>
               <span style="color:var(--gold); font-size:0.8rem; font-weight:700;">${stars}</span>
             </div>
-            <p style="margin:0; font-size:0.85rem; color:var(--text-main); line-height:1.4;">${r.comment || '<i>Sin comentario.</i>'}</p>
+            <p style="margin:0; font-size:0.85rem; color:var(--text-main); line-height:1.4;">${escapeHTML(r.comment) || '<i>Sin comentario.</i>'}</p>
             <span style="font-size:0.7rem; color:var(--text-muted); display:block; margin-top:2px;">${new Date(r.createdAt).toLocaleDateString()}</span>
           </div>
         `;
@@ -379,6 +418,8 @@ function updateDisplay() {
 
   renderProducts(filtered);
 }
+
+
 
 // Load Products from API
 function load(){

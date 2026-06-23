@@ -245,6 +245,10 @@
             <strong id="resCustomerName">—</strong>
           </div>
           <div>
+            <span>Cédula/Documento:</span>
+            <strong id="resCustomerDoc">—</strong>
+          </div>
+          <div>
             <span>Método de Pago:</span>
             <span id="resPayment">—</span>
           </div>
@@ -359,6 +363,7 @@
         document.getElementById('resOrderId').textContent = order.id;
         document.getElementById('resOrderDate').textContent = new Date(order.createdAt).toLocaleString();
         document.getElementById('resCustomerName').textContent = `${order.buyer.firstName} ${order.buyer.lastName}`;
+        document.getElementById('resCustomerDoc').textContent = order.buyer.documentId || '—';
         document.getElementById('resPayment').textContent = order.payment === 'nequi' ? 'Nequi' : 'Pago contra entrega';
         document.getElementById('resItemsCount').textContent = order.items.reduce((sum, i) => sum + i.qty, 0) + ' artículo(s)';
         document.getElementById('resTotal').textContent = formatCurrency(order.total);

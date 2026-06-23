@@ -2,6 +2,16 @@ function formatCurrency(n){
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
 }
 
+function escapeHTML(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Global Toast System
 function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
@@ -76,12 +86,31 @@ const clientLoginForm = document.getElementById('clientLoginForm');
 const clientRegisterForm = document.getElementById('clientRegisterForm');
 const customerOrdersList = document.getElementById('customerOrdersList');
 
+const loginCard = document.getElementById('loginCard');
+const registerCard = document.getElementById('registerCard');
+const showRegisterBtn = document.getElementById('showRegisterBtn');
+const showLoginBtn = document.getElementById('showLoginBtn');
+
 // Profile Fields
 const profName = document.getElementById('profName');
+const profDocumentId = document.getElementById('profDocumentId');
 const profEmail = document.getElementById('profEmail');
 const profPhone = document.getElementById('profPhone');
 const profAddress = document.getElementById('profAddress');
 const clientLogoutBtn = document.getElementById('clientLogoutBtn');
+
+// Card Switching Event Listeners
+showRegisterBtn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  loginCard.style.display = 'none';
+  registerCard.style.display = 'block';
+});
+
+showLoginBtn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  registerCard.style.display = 'none';
+  loginCard.style.display = 'block';
+});
 
 function getClientToken() {
   return localStorage.getItem('clientToken');
@@ -95,8 +124,10 @@ async function checkAuth() {
     dashboardContainer.style.display = 'grid';
     await loadProfileAndHistory(token);
   } else {
-    authContainer.style.display = 'grid';
+    authContainer.style.display = 'flex';
     dashboardContainer.style.display = 'none';
+    loginCard.style.display = 'block';
+    registerCard.style.display = 'none';
   }
 }
 
@@ -121,6 +152,7 @@ async function loadProfileAndHistory(token) {
     
     // Set profile info
     profName.textContent = `${user.firstName} ${user.lastName}`;
+    if (profDocumentId) profDocumentId.textContent = user.documentId || 'No registrado';
     profEmail.textContent = user.email;
     profPhone.textContent = user.phone;
     profAddress.textContent = user.address || 'Sin dirección registrada';
@@ -140,18 +172,76 @@ async function loadProfileAndHistory(token) {
       else if (o.status === 'delivered') { statusClass = 'status-delivered'; statusText = 'Entregado 🟢'; }
       else if (o.status === 'cancelled') { statusClass = 'status-cancelled'; statusText = 'Cancelado ✕'; }
       
-      const itemsString = o.items.map(i => `${i.name} (x${i.qty})`).join(', ');
+      const totalItemsQty = o.items.reduce((sum, item) => sum + item.qty, 0);
+      const itemsSummaryText = `${totalItemsQty} ${totalItemsQty === 1 ? 'artículo' : 'artículos'}`;
       
+      let paymentText = o.payment;
+      if (o.payment === 'cash') paymentText = 'Efectivo / Contraentrega 💵';
+      else if (o.payment === 'transfer') paymentText = 'Transferencia Bancaria 🏦';
+
       return `
-        <div class="account-order-item">
-          <div class="order-info-left">
-            <h4>Pedido: <span style="color:var(--accent); font-family:var(--font-heading);">${o.id}</span></h4>
-            <p style="margin-bottom:6px;"><strong>Artículos:</strong> ${itemsString}</p>
-            <p>Fecha: ${new Date(o.createdAt).toLocaleDateString()} — total: <strong>${formatCurrency(o.total)}</strong></p>
+        <div class="account-order-card">
+          <div class="account-order-header">
+            <div class="order-header-info">
+              <h4>Pedido: <span style="color:var(--accent); font-family:var(--font-heading); font-weight:bold;">${o.id}</span></h4>
+              <div class="order-header-meta">
+                <span>📅 ${new Date(o.createdAt).toLocaleDateString()}</span>
+                <span>🛍️ ${itemsSummaryText}</span>
+                <span>💰 Total: <strong>${formatCurrency(o.total)}</strong></span>
+              </div>
+            </div>
+            <div class="order-header-right">
+              <span class="order-status-tag ${statusClass}">${statusText}</span>
+              <span class="accordion-chevron">▼</span>
+            </div>
           </div>
-          <div class="order-info-right">
-            <span class="order-status-tag ${statusClass}">${statusText}</span>
-            <button class="btn btn-secondary" onclick="location.href='tracking.html?id=${o.id}'" style="padding:6px 12px; font-size:0.75rem; border:1px solid var(--border-color)">Seguir Envío</button>
+          <div class="account-order-details">
+            <div class="order-meta-grid">
+              <div class="order-meta-item">
+                <p><strong>Método de Pago:</strong></p>
+                <p>${paymentText}</p>
+              </div>
+              <div class="order-meta-item">
+                <p><strong>Dirección de Envío:</strong></p>
+                <p>${escapeHTML(o.buyer.address) || 'Recogida en tienda'}</p>
+              </div>
+              <div class="order-meta-item">
+                <p><strong>Teléfono de Contacto:</strong></p>
+                <p>${escapeHTML(o.buyer.phone) || 'No registrado'}</p>
+              </div>
+            </div>
+            
+            <div class="order-products-table-wrapper">
+              <table class="order-products-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th class="text-center">Cant.</th>
+                    <th class="text-right">Precio Unit.</th>
+                    <th class="text-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${o.items.map(item => `
+                    <tr>
+                      <td>${escapeHTML(item.name)}</td>
+                      <td class="text-center">${item.qty}</td>
+                      <td class="text-right">${formatCurrency(item.price)}</td>
+                      <td class="text-right">${formatCurrency(item.price * item.qty)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="details-footer">
+              <div class="order-total-sum">
+                Total del Pedido: <strong>${formatCurrency(o.total)}</strong>
+              </div>
+              <button class="btn btn-secondary" onclick="location.href='tracking.html?id=${o.id}'" style="padding:8px 16px; font-size:0.8rem; border:1px solid var(--border-color); border-radius: var(--radius-round)">
+                Seguir Envío 🚚
+              </button>
+            </div>
           </div>
         </div>
       `;
@@ -172,7 +262,8 @@ clientRegisterForm?.addEventListener('submit', async (e) => {
     email: fd.get('email').trim(),
     password: fd.get('password').trim(),
     phone: fd.get('phone').trim(),
-    address: fd.get('address').trim()
+    address: fd.get('address').trim(),
+    documentId: fd.get('documentId').trim()
   };
   
   try {
@@ -187,18 +278,23 @@ clientRegisterForm?.addEventListener('submit', async (e) => {
       throw new Error(error.error || 'Fallo al crear la cuenta.');
     }
     
-    const data = await res.json();
-    localStorage.setItem('clientToken', data.token);
-    localStorage.setItem('clientUser', JSON.stringify(data.user));
-    showToast('¡Cuenta creada correctamente!', 'success');
+    showToast('¡Cuenta creada correctamente! Ahora puedes iniciar sesión.', 'success');
     
-    // Save to checkout cache fields for convenience
-    localStorage.setItem('last_firstName', data.user.firstName);
-    localStorage.setItem('last_lastName', data.user.lastName);
-    localStorage.setItem('last_phone', data.user.phone);
-    localStorage.setItem('last_address', data.user.address);
+    // Switch to login card and prefill the email
+    registerCard.style.display = 'none';
+    loginCard.style.display = 'block';
     
-    checkAuth();
+    const loginEmailInput = clientLoginForm.querySelector('input[name="email"]');
+    if (loginEmailInput) {
+      loginEmailInput.value = payload.email;
+    }
+    
+    const loginPasswordInput = clientLoginForm.querySelector('input[name="password"]');
+    if (loginPasswordInput) {
+      loginPasswordInput.focus();
+    }
+    
+    clientRegisterForm.reset();
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -235,6 +331,7 @@ clientLoginForm?.addEventListener('submit', async (e) => {
     localStorage.setItem('last_lastName', data.user.lastName);
     localStorage.setItem('last_phone', data.user.phone);
     localStorage.setItem('last_address', data.user.address);
+    localStorage.setItem('last_documentId', data.user.documentId || '');
     
     checkAuth();
   } catch (err) {
@@ -250,6 +347,27 @@ clientLogoutBtn?.addEventListener('click', () => {
   checkAuth();
 });
 
+// Event Delegation for Accordion Toggles
+customerOrdersList?.addEventListener('click', (e) => {
+  const header = e.target.closest('.account-order-header');
+  if (header) {
+    const card = header.closest('.account-order-card');
+    if (card) {
+      card.classList.toggle('active');
+    }
+  }
+});
+
 // Initialize on Load
 applySavedTheme();
 checkAuth();
+
+// Restringir entrada en tiempo real según el tipo de campo
+document.addEventListener('input', (e) => {
+  if (!e.target) return;
+  if (e.target.name === 'documentId' || e.target.name === 'phone') {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  } else if (e.target.name === 'firstName' || e.target.name === 'lastName') {
+    e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/g, '');
+  }
+});

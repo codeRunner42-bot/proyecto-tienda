@@ -45,7 +45,8 @@
         <h3>Detalles de compra</h3>
         <label>Nombre*: <input type="text" name="firstName" required/></label>
         <label>Apellidos*: <input type="text" name="lastName" required/></label>
-        <label>Teléfono* (WhatsApp): <input type="tel" name="phone" required/></label>
+        <label>Documento de Identidad / Cédula*: <input type="text" name="documentId" required pattern="\d{5,15}" title="La cédula debe contener únicamente entre 5 y 15 dígitos numéricos sin puntos ni guiones."/></label>
+        <label>Teléfono* (WhatsApp): <input type="tel" name="phone" required pattern="\d{7,15}" title="El teléfono debe contener únicamente entre 7 y 15 dígitos numéricos."/></label>
         <label>Dirección: <input type="text" name="address"/></label>
         <h4>Método de pago</h4>
         <div class="payment-options">

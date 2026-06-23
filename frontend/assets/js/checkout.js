@@ -103,11 +103,13 @@ function autofillForm() {
   
   const fName = user ? user.firstName : (localStorage.getItem('last_firstName') || '');
   const lName = user ? user.lastName : (localStorage.getItem('last_lastName') || '');
+  const documentId = user ? user.documentId : (localStorage.getItem('last_documentId') || '');
   const phone = user ? user.phone : (localStorage.getItem('last_phone') || '');
   const address = user ? user.address : (localStorage.getItem('last_address') || '');
   
   orderForm.querySelector('[name="firstName"]').value = fName;
   orderForm.querySelector('[name="lastName"]').value = lName;
+  orderForm.querySelector('[name="documentId"]').value = documentId;
   orderForm.querySelector('[name="phone"]').value = phone;
   orderForm.querySelector('[name="address"]').value = address;
 }
@@ -126,6 +128,7 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
   const buyer = {
     firstName: fd.get('firstName').trim(),
     lastName: fd.get('lastName').trim(),
+    documentId: fd.get('documentId').trim(),
     phone: fd.get('phone').trim(),
     address: fd.get('address').trim()
   };
@@ -139,7 +142,6 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
     items: checkoutItems.map(i=>({ id:i.id, name:i.name, price:i.price, qty:i.qty })),
     total: Number(total)
   };
-
   try {
     const response = await fetch('/api/orders', {
       method: 'POST',
@@ -155,6 +157,7 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
     // Cache billing/shipping details for guest checkouts convenience
     localStorage.setItem('last_firstName', buyer.firstName);
     localStorage.setItem('last_lastName', buyer.lastName);
+    localStorage.setItem('last_documentId', buyer.documentId);
     localStorage.setItem('last_phone', buyer.phone);
     localStorage.setItem('last_address', buyer.address);
 
@@ -163,6 +166,19 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
     cart = cart.filter(i=>!boughtIds.includes(i.id));
     localStorage.setItem('cart',JSON.stringify(cart));
     localStorage.removeItem('checkoutItems');
+    
+    // Generate WhatsApp text
+    const phoneNum = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
+    const itemsText = order.items.map(i => `- ${i.name} (x${i.qty}): ${formatCurrency(i.price * i.qty)}`).join('\n');
+    const paymentText = order.payment === 'nequi' ? 'Nequi' : 'Pago contra entrega';
+    const totalFormatted = formatCurrency(order.total);
+    const addressText = order.buyer.address ? order.buyer.address : 'No especificada';
+    
+    const whatsappMessage = `¡Hola Ale Beauty Art! He realizado un nuevo pedido en la web.\n\n*ID del Pedido:* ${order.id}\n*Cliente:* ${order.buyer.firstName} ${order.buyer.lastName}\n*Cédula/Documento:* ${order.buyer.documentId || 'No especificado'}\n*Teléfono:* ${order.buyer.phone}\n*Dirección:* ${addressText}\n*Método de Pago:* ${paymentText}\n\n*Detalle de Productos:*\n${itemsText}\n\n*Total:* ${totalFormatted}\n\nPor favor, confirmen mi pedido. ¡Gracias!`;
+    const waUrl = `https://wa.me/${phoneNum}?text=${encodeURIComponent(whatsappMessage)}`;
+    
+    // Open WhatsApp
+    window.open(waUrl, '_blank');
     
     showToast(`¡Pedido creado con ID ${order.id}! Redirigiendo a tu recibo...`, 'success');
     
@@ -177,3 +193,14 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
 applySavedTheme();
 renderSummary();
 autofillForm();
+
+// Restringir entrada en tiempo real según el tipo de campo
+document.addEventListener('input', (e) => {
+  if (!e.target) return;
+  if (e.target.name === 'documentId' || e.target.name === 'phone') {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  } else if (e.target.name === 'firstName' || e.target.name === 'lastName') {
+    e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/g, '');
+  }
+});
+

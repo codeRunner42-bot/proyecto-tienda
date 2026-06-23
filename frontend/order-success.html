@@ -186,6 +186,7 @@
         <div class="invoice-block">
           <h4>Cliente</h4>
           <p id="invCustomerName">Cargando...</p>
+          <p>Documento/Cédula: <span id="invCustomerDoc">Cargando...</span></p>
           <p>Teléfono: <span id="invCustomerPhone">Cargando...</span></p>
         </div>
         <div class="invoice-block">
@@ -270,6 +271,16 @@
       return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
     }
 
+    function escapeHTML(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     // Load invoice data from query params or localStorage
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('orderId');
@@ -289,6 +300,7 @@
         document.getElementById('invOrderId').textContent = order.id;
         document.getElementById('invDate').textContent = new Date(order.createdAt).toLocaleString();
         document.getElementById('invCustomerName').textContent = `${order.buyer.firstName} ${order.buyer.lastName}`;
+        document.getElementById('invCustomerDoc').textContent = order.buyer.documentId || localStorage.getItem('last_documentId') || '—';
         document.getElementById('invCustomerPhone').textContent = localStorage.getItem('last_phone') || '—';
         document.getElementById('invCustomerAddress').textContent = localStorage.getItem('last_address') || '—';
         
@@ -305,7 +317,7 @@
         const tbody = document.getElementById('invoiceTableBody');
         tbody.innerHTML = order.items.map(item => `
           <tr>
-            <td><strong>${item.name}</strong></td>
+            <td><strong>${escapeHTML(item.name)}</strong></td>
             <td>${formatCurrency(item.price)}</td>
             <td>${item.qty}</td>
             <td style="text-align: right; font-weight:700;">${formatCurrency(item.price * item.qty)}</td>
@@ -321,8 +333,9 @@
           const paymentText = order.payment==='nequi' ? 'Pago con Nequi (enviando comprobante)' : 'Pago contra entrega (pagar al recibir)';
           const customerPhone = localStorage.getItem('last_phone') || '—';
           const customerAddress = localStorage.getItem('last_address') || '—';
+          const customerDoc = order.buyer.documentId || localStorage.getItem('last_documentId') || '—';
           
-          const message = encodeURIComponent(`¡Hola Ale Beauty Art! Adjunto mi comprobante o confirmo mi pedido.\n\nPedido ID: ${order.id}\nCliente: ${order.buyer.firstName} ${order.buyer.lastName}\nTel: ${customerPhone}\nDirección: ${customerAddress}\nMétodo de pago: ${paymentText}\n\nProductos:\n${itemsText}\n\nTotal: ${formatCurrency(order.total)}`);
+          const message = encodeURIComponent(`¡Hola Ale Beauty Art! Adjunto mi comprobante o confirmo mi pedido.\n\nPedido ID: ${order.id}\nCliente: ${order.buyer.firstName} ${order.buyer.lastName}\nCédula/Documento: ${customerDoc}\nTel: ${customerPhone}\nDirección: ${customerAddress}\nMétodo de pago: ${paymentText}\n\nProductos:\n${itemsText}\n\nTotal: ${formatCurrency(order.total)}`);
           const number = '573022880520';
           const url = `https://wa.me/${number}?text=${message}`;
           window.open(url, '_blank');

@@ -37,6 +37,7 @@
       <button data-cat="tecnologia" class="cat-btn">Tecnología</button>
       <button data-cat="accesorios" class="cat-btn">Accesorios</button>
       <button data-cat="cuidado personal" class="cat-btn">Cuidado Personal</button>
+      <button data-cat="capilar" class="cat-btn">Capilar</button>
     </nav>
   </header>
 
@@ -51,8 +52,9 @@
           <a class="btn btn-secondary" href="cart.html">Ir al carrito</a>
         </div>
       </div>
+
       <div class="hero-image">
-        <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=900&q=80" alt="Productos de belleza y tecnología" />
+        <img src="assets/images/hero_makeup_tech.png" alt="Maquillaje y tecnología">
       </div>
     </section>
 
@@ -64,6 +66,7 @@
         <button data-cat="tecnologia" class="cat-card">Tecnología</button>
         <button data-cat="accesorios" class="cat-card">Accesorios</button>
         <button data-cat="cuidado personal" class="cat-card">Cuidado Personal</button>
+        <button data-cat="capilar" class="cat-card">Capilar</button>
       </div>
     </section>
 
@@ -123,11 +126,16 @@
   <div id="productModal" class="modal-backdrop">
     <div class="modal-card">
       <button class="modal-close-btn" id="modalClose">&times;</button>
+
       <div class="modal-img-area">
-        <button id="galleryPrev" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.5); color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem;">&#10094;</button>
-        <img id="modalImg" src="" alt="">
-        <button id="galleryNext" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.5); color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem;">&#10095;</button>
+        <div class="modal-main-img-wrapper" style="position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; height: calc(100% - 70px);">
+          <button id="galleryPrev" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.55); color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; border:none; cursor:pointer;">&#10094;</button>
+          <img id="modalImg" src="" alt="">
+          <button id="galleryNext" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); z-index:10; background:rgba(0,0,0,0.55); color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; border:none; cursor:pointer;">&#10095;</button>
+        </div>
+        <div id="modalThumbnails" style="display:flex; justify-content:center; gap:8px; margin-top:12px; padding:0 16px; overflow-x:auto; height:50px;"></div>
       </div>
+
       <div class="modal-content-area">
         <span id="modalCat" class="modal-cat"></span>
         <h2 id="modalTitle"></h2>
