@@ -118,7 +118,15 @@
               </div>
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <input type="text" name="name" placeholder="Nombre *" required>
-                <input type="text" name="category" placeholder="Categoría *" required>
+                <select name="category" required>
+                  <option value="" disabled selected>Categoría *</option>
+                  <option value="maquillaje">Maquillaje</option>
+                  <option value="perfumeria">Perfumería</option>
+                  <option value="tecnologia">Tecnología</option>
+                  <option value="accesorios">Accesorios</option>
+                  <option value="cuidado personal">Cuidado Personal</option>
+                  <option value="capilar">Capilar</option>
+                </select>
               </div>
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <input type="number" name="price" placeholder="Precio *" step="1" min="1" required>
