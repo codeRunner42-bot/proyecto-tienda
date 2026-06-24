@@ -29,7 +29,7 @@
   {
     "id": "p4",
     "name": "Cargador USB-C 20W",
-    "category": "accesorios",
+    "category": "accesorios tech",
     "price": 25000,
     "stock": 2,
     "description": "Velocidad óptima.\nCompatibilidad.\nDiseño ultra compacto.\nCarga segura.",
@@ -101,7 +101,7 @@
   {
     "id": "p14",
     "name": "Set de cuidado de uñas",
-    "category": "accesorios",
+    "category": "accesorios belleza",
     "price": 60000,
     "stock": 9,
     "description": "Herramientas completas para manicure.",
@@ -128,7 +128,7 @@
   {
     "id": "p17",
     "name": "Kit de Esmalte Semipermanente",
-    "category": "accesorios",
+    "category": "accesorios belleza",
     "price": 110000,
     "stock": 11,
     "description": "Colores intensos y duraderos.",
@@ -146,7 +146,7 @@
   {
     "id": "p19",
     "name": "Cargador USB-C 25W",
-    "category": "accesorios",
+    "category": "accesorios tech",
     "price": 25000,
     "stock": 2,
     "description": "Carga Ultra Rápida.\nTecnología Inteligente.\nMáxima versatilidad.\nSeguridad avanzada:.",
