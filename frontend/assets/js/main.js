@@ -428,7 +428,7 @@ searchClearBtn?.addEventListener('click', () => {
 // WhatsApp Link Generator
 const waHandler = e => {
   e.preventDefault();
-  const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
+  const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573146093646';
   const text = encodeURIComponent('¡Hola! Me gustaría recibir más información sobre sus productos.');
   window.open(`https://wa.me/${number}?text=${text}`, '_blank');
 };

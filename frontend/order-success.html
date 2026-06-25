@@ -303,7 +303,7 @@
           const customerDoc = order.buyer.documentId || localStorage.getItem('last_documentId') || '—';
           
           const message = encodeURIComponent(`¡Hola Ale Beauty Art! Adjunto mi comprobante o confirmo mi pedido.\n\nPedido ID: ${order.id}\nCliente: ${order.buyer.firstName} ${order.buyer.lastName}\nCédula/Documento: ${customerDoc}\nTel: ${customerPhone}\nDirección: ${customerAddress}\nMétodo de pago: ${paymentText}\n\nProductos:\n${itemsText}\n\nTotal: ${formatCurrency(order.total)}`);
-          const number = '573022880520';
+          const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573146093646';
           const url = `https://wa.me/${number}?text=${message}`;
           window.open(url, '_blank');
         });

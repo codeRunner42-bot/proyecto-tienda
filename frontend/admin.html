@@ -24,6 +24,7 @@
         <button class="nav-item active" data-tab="dashboard">📊 Dashboard</button>
         <button class="nav-item" data-tab="products">📦 Productos</button>
         <button class="nav-item" data-tab="orders">🛒 Pedidos</button>
+        <button class="nav-item" data-tab="invoices">🧾 Facturación</button>
         <button class="nav-item" data-tab="users">👥 Clientes</button>
         <button class="nav-item" data-tab="reviews">💬 Opiniones</button>
       </nav>
@@ -101,6 +102,90 @@
           </div>
         </div>
       </section>
+
+      <!-- PESTAÑA: FACTURACIÓN -->
+      <section class="tab-pane" id="tab-invoices">
+
+        <!-- RESUMEN FINANCIERO -->
+        <div id="invoiceStatsPanel" style="display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:28px;">
+          <div class="stat-card"><span class="stat-card-title">Total Facturado</span><span class="stat-card-val" id="statInvTotal">$0</span><span class="stat-card-icon">🧾</span></div>
+          <div class="stat-card"><span class="stat-card-title">Pagadas</span><span class="stat-card-val" id="statInvPaid">$0</span><span class="stat-card-icon" style="color:#27ae60">✅</span></div>
+          <div class="stat-card"><span class="stat-card-title">Pendientes</span><span class="stat-card-val" id="statInvPending">$0</span><span class="stat-card-icon" style="color:#d4af37">⏳</span></div>
+          <div class="stat-card"><span class="stat-card-title">Anuladas</span><span class="stat-card-val" id="statInvCancelled">$0</span><span class="stat-card-icon" style="color:#e74c3c">❌</span></div>
+        </div>
+
+        <!-- FILTROS Y ACCIONES -->
+        <div class="admin-actions" style="margin-bottom:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:space-between;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Desde:</label>
+            <input type="date" id="invFilterFrom" style="padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-primary); font-size:0.85rem;">
+            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Hasta:</label>
+            <input type="date" id="invFilterTo" style="padding:8px 12px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-primary); font-size:0.85rem;">
+            <button id="invFilterBtn" class="btn btn-secondary" style="padding:8px 16px; font-size:0.85rem;">🔍 Filtrar</button>
+            <button id="invClearFilterBtn" class="btn btn-secondary" style="padding:8px 16px; font-size:0.85rem;">✖ Limpiar</button>
+          </div>
+          <button id="newInvoiceBtn" class="btn btn-primary">+ Nueva Factura</button>
+        </div>
+
+        <!-- FORMULARIO CREAR FACTURA -->
+        <div id="invoiceFormWrapper" style="display:none; margin-bottom:24px;">
+          <form id="invoiceForm" class="admin-form">
+            <h2 style="margin-bottom:16px;">Generar Factura desde Pedido</h2>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:16px;">
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-weight:700; font-size:0.85rem; color:var(--accent-strong);">Pedido *</label>
+                <select id="invOrderSelect" required style="padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-primary); font-size:0.9rem;">
+                  <option value="">Seleccionar pedido...</option>
+                </select>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label style="font-weight:700; font-size:0.85rem; color:var(--accent-strong);">% Impuesto (IVA)</label>
+                <input type="number" id="invTax" min="0" max="100" step="0.5" value="0" placeholder="0" style="padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-primary); font-size:0.9rem;">
+              </div>
+            </div>
+            <textarea id="invNotes" placeholder="Notas internas (opcional)" style="margin-top:12px; padding:12px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-primary); font-size:0.9rem; width:100%; min-height:70px; resize:vertical;"></textarea>
+            <div class="form-buttons" style="margin-top:16px;">
+              <button type="submit" class="btn btn-primary">Generar Factura</button>
+              <button type="button" id="cancelInvoiceForm" class="btn btn-secondary">Cancelar</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TABLA DE FACTURAS -->
+        <div style="background:var(--surface); border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-sm); overflow-x:auto;">
+          <table id="invoicesTable" class="admin-table">
+            <thead>
+              <tr>
+                <th>N° Factura</th>
+                <th>Pedido</th>
+                <th>Cliente</th>
+                <th>Subtotal</th>
+                <th>IVA</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MODAL VISTA PREVIA FACTURA -->
+      <div id="invoiceModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; overflow-y:auto; padding:30px 16px;">
+        <div style="max-width:720px; margin:0 auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:var(--accent,#8b1a4a); color:#fff;">
+            <span style="font-weight:800; font-size:1.1rem;">Vista Previa de Factura</span>
+            <div style="display:flex; gap:10px;">
+              <button id="downloadPdfBtn" class="btn" style="background:#fff; color:var(--accent,#8b1a4a); padding:8px 16px; font-size:0.85rem; font-weight:700;">⬇ Descargar PDF</button>
+              <button id="printInvoiceBtn" class="btn" style="background:rgba(255,255,255,0.2); color:#fff; padding:8px 16px; font-size:0.85rem;">🖨 Imprimir</button>
+              <button id="closeInvoiceModal" class="btn" style="background:rgba(255,255,255,0.2); color:#fff; padding:8px 12px; font-size:0.85rem;">✕</button>
+            </div>
+          </div>
+          <div id="invoicePreview" style="padding:40px; font-family:'Outfit',sans-serif;"></div>
+        </div>
+      </div>
 
       <!-- PESTAÑA: PRODUCTOS -->
       <section class="tab-pane" id="tab-products">
@@ -314,8 +399,10 @@
   <!-- TOAST CONTAINER -->
   <div id="toastContainer" class="toast-container"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/admin.js"></script>
+  <script src="assets/js/invoices.js"></script>
 </body>
 </html>

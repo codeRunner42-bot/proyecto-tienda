@@ -90,6 +90,21 @@ async function setupDatabase() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS invoices (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL,
+      number TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL DEFAULT 'pending',
+      subtotal REAL NOT NULL,
+      tax REAL NOT NULL DEFAULT 0,
+      total REAL NOT NULL,
+      notes TEXT DEFAULT '',
+      "createdAt" TEXT NOT NULL,
+      "paidAt" TEXT
+    )
+  `);
+
   console.log('Base de datos PostgreSQL configurada correctamente.');
 }
 
@@ -1133,6 +1148,212 @@ app.delete('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar review:', error);
     res.status(500).json({ error: 'No se pudo eliminar la opinión.' });
+  }
+});
+
+// ==========================================================================
+// INVOICES (BILLING) ENDPOINTS
+// ==========================================================================
+
+// Auto-generate invoice number FAC-YYYY-NNN
+async function generateInvoiceNumber() {
+  const year = new Date().getFullYear();
+  const result = await pool.query(
+    `SELECT number FROM invoices WHERE number LIKE $1 ORDER BY number DESC LIMIT 1`,
+    [`FAC-${year}-%`]
+  );
+  if (result.rows.length === 0) return `FAC-${year}-001`;
+  const last = result.rows[0].number;
+  const lastNum = parseInt(last.split('-')[2], 10);
+  return `FAC-${year}-${String(lastNum + 1).padStart(3, '0')}`;
+}
+
+function formatInvoiceRow(inv) {
+  return {
+    id: inv.id,
+    order_id: inv.order_id,
+    number: inv.number,
+    status: inv.status,
+    subtotal: inv.subtotal,
+    tax: inv.tax,
+    total: inv.total,
+    notes: inv.notes,
+    createdAt: inv.createdAt,
+    paidAt: inv.paidAt || null,
+    order: inv.order_data ? JSON.parse(inv.order_data) : null
+  };
+}
+
+// GET all invoices with order details (Admin only)
+app.get('/api/invoices', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT i.*,
+        json_build_object(
+          'firstName', o."firstName",
+          'lastName', o."lastName",
+          'documentId', o."documentId",
+          'phone', o.phone,
+          'address', o.address,
+          'payment', o.payment,
+          'items', o.items::text,
+          'status', o.status
+        )::text AS order_data
+      FROM invoices i
+      LEFT JOIN orders o ON i.order_id = o.id
+      ORDER BY i."createdAt" DESC
+    `);
+    res.json(result.rows.map(formatInvoiceRow));
+  } catch (error) {
+    console.error('Error al cargar facturas:', error);
+    res.status(500).json({ error: 'No se pudieron cargar las facturas.' });
+  }
+});
+
+// GET invoice stats by period (Admin only)
+app.get('/api/invoices/stats', requireAdmin, async (req, res) => {
+  try {
+    const { from, to } = req.query;
+    let whereClause = '';
+    const params = [];
+    if (from && to) {
+      whereClause = `WHERE "createdAt" >= $1 AND "createdAt" <= $2`;
+      params.push(from, to + 'T23:59:59.999Z');
+    } else if (from) {
+      whereClause = `WHERE "createdAt" >= $1`;
+      params.push(from);
+    }
+    const result = await pool.query(`
+      SELECT
+        COUNT(*) AS total_count,
+        COALESCE(SUM(total), 0) AS total_revenue,
+        COALESCE(SUM(CASE WHEN status = 'paid' THEN total ELSE 0 END), 0) AS paid_revenue,
+        COALESCE(SUM(CASE WHEN status = 'pending' THEN total ELSE 0 END), 0) AS pending_revenue,
+        COALESCE(SUM(CASE WHEN status = 'cancelled' THEN total ELSE 0 END), 0) AS cancelled_revenue,
+        COUNT(CASE WHEN status = 'paid' THEN 1 END) AS paid_count,
+        COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending_count,
+        COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled_count
+      FROM invoices ${whereClause}
+    `, params);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error al obtener estadísticas de facturas:', error);
+    res.status(500).json({ error: 'No se pudieron obtener las estadísticas.' });
+  }
+});
+
+// GET invoice by ID (Admin only)
+app.get('/api/invoices/:id', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT i.*,
+        json_build_object(
+          'firstName', o."firstName",
+          'lastName', o."lastName",
+          'documentId', o."documentId",
+          'phone', o.phone,
+          'address', o.address,
+          'payment', o.payment,
+          'items', o.items::text,
+          'status', o.status
+        )::text AS order_data
+      FROM invoices i
+      LEFT JOIN orders o ON i.order_id = o.id
+      WHERE i.id = $1
+    `, [req.params.id]);
+    const inv = result.rows[0];
+    if (!inv) return res.status(404).json({ error: 'Factura no encontrada.' });
+    res.json(formatInvoiceRow(inv));
+  } catch (error) {
+    console.error('Error al leer factura:', error);
+    res.status(500).json({ error: 'Error al leer la factura.' });
+  }
+});
+
+// CREATE invoice from order (Admin only)
+app.post('/api/invoices', requireAdmin, async (req, res) => {
+  try {
+    const { order_id, tax_percent, notes } = req.body || {};
+    if (!order_id) return res.status(400).json({ error: 'El ID del pedido es obligatorio.' });
+
+    // Check order exists
+    const orderResult = await pool.query('SELECT * FROM orders WHERE id = $1', [order_id]);
+    const order = orderResult.rows[0];
+    if (!order) return res.status(404).json({ error: 'Pedido no encontrado.' });
+
+    // Avoid duplicate invoices for same order
+    const dupCheck = await pool.query('SELECT id FROM invoices WHERE order_id = $1', [order_id]);
+    if (dupCheck.rows.length > 0) {
+      return res.status(400).json({ error: 'Ya existe una factura para este pedido.' });
+    }
+
+    const taxRate = Math.max(0, Math.min(100, Number(tax_percent || 0)));
+    const subtotal = Number(order.total);
+    const tax = parseFloat((subtotal * taxRate / 100).toFixed(2));
+    const total = parseFloat((subtotal + tax).toFixed(2));
+    const invoiceNumber = await generateInvoiceNumber();
+    const invoiceId = 'inv-' + Date.now().toString(36) + Math.floor(Math.random() * 9999).toString(36);
+    const createdAt = new Date().toISOString();
+
+    await pool.query(
+      `INSERT INTO invoices (id, order_id, number, status, subtotal, tax, total, notes, "createdAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [invoiceId, order_id, invoiceNumber, 'pending', subtotal, tax, total, notes || '', createdAt]
+    );
+
+    res.status(201).json({
+      id: invoiceId, order_id, number: invoiceNumber,
+      status: 'pending', subtotal, tax, total,
+      notes: notes || '', createdAt, paidAt: null
+    });
+  } catch (error) {
+    console.error('Error al crear factura:', error);
+    res.status(500).json({ error: 'No se pudo crear la factura.' });
+  }
+});
+
+// UPDATE invoice status (Admin only)
+app.put('/api/invoices/:id', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM invoices WHERE id = $1', [req.params.id]);
+    const inv = result.rows[0];
+    if (!inv) return res.status(404).json({ error: 'Factura no encontrada.' });
+
+    const { status, notes } = req.body || {};
+    const validStatuses = ['pending', 'paid', 'cancelled'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Estado de factura no válido.' });
+    }
+
+    const newStatus = status || inv.status;
+    const newNotes = notes !== undefined ? String(notes).trim() : inv.notes;
+    const paidAt = newStatus === 'paid' && inv.status !== 'paid'
+      ? new Date().toISOString()
+      : (newStatus === 'paid' ? inv.paidAt : null);
+
+    await pool.query(
+      `UPDATE invoices SET status = $1, notes = $2, "paidAt" = $3 WHERE id = $4`,
+      [newStatus, newNotes, paidAt, req.params.id]
+    );
+
+    res.json({ ...inv, status: newStatus, notes: newNotes, paidAt });
+  } catch (error) {
+    console.error('Error al actualizar factura:', error);
+    res.status(500).json({ error: 'No se pudo actualizar la factura.' });
+  }
+});
+
+// DELETE invoice (Admin only)
+app.delete('/api/invoices/:id', requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM invoices WHERE id = $1', [req.params.id]);
+    const inv = result.rows[0];
+    if (!inv) return res.status(404).json({ error: 'Factura no encontrada.' });
+    await pool.query('DELETE FROM invoices WHERE id = $1', [req.params.id]);
+    res.json({ deleted: inv });
+  } catch (error) {
+    console.error('Error al eliminar factura:', error);
+    res.status(500).json({ error: 'No se pudo eliminar la factura.' });
   }
 });
 

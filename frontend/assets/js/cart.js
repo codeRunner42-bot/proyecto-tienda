@@ -144,7 +144,7 @@ document.getElementById('buyBtn').addEventListener('click', () => {
 
 document.getElementById('whatsappLink')?.addEventListener('click', e => {
   e.preventDefault();
-  const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
+  const number = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573146093646';
   const text = encodeURIComponent('¡Hola! Tengo productos en mi carrito y me gustaría finalizar mi compra.');
   window.open(`https://wa.me/${number}?text=${text}`, '_blank');
 });

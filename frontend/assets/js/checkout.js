@@ -103,7 +103,7 @@ document.getElementById('orderForm')?.addEventListener('submit', async e => {
     localStorage.removeItem('checkoutItems');
 
     // Generar mensaje de WhatsApp con etiqueta de pago correcta (#4)
-    const phoneNum = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573022880520';
+    const phoneNum = (typeof PHONE !== 'undefined' && PHONE !== '') ? PHONE : '573146093646';
     const itemsText = order.items.map(i => `- ${i.name} (x${i.qty}): ${formatCurrency(i.price * i.qty)}`).join('\n');
     const paymentText = getPaymentLabel(order.payment); // usa getPaymentLabel de utils.js
     const totalFormatted = formatCurrency(order.total);
