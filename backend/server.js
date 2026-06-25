@@ -5,6 +5,8 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
+const cloudinary = require('cloudinary').v2;
+// Cloudinary se autoconfigura desde la variable de entorno CLOUDINARY_URL
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -152,17 +154,11 @@ async function migrateData() {
   }
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const name = Date.now().toString(36) + '-' + Math.round(Math.random() * 1e9) + ext;
-    cb(null, name);
-  }
+// Usar memoria en lugar de disco — Cloudinary sube el buffer directamente
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB máximo
 });
-const upload = multer({ storage });
 
 app.use(express.json());
 app.use('/uploads', express.static(UPLOADS_DIR));
@@ -238,11 +234,36 @@ app.post('/api/admin/login', async (req, res) => {
   res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
 });
 
-// Image Upload endpoint (Admin only)
-app.post('/api/upload-image', requireAdmin, upload.single('image'), (req, res) => {
+// Image Upload endpoint (Admin only) — sube a Cloudinary si está configurado
+app.post('/api/upload-image', requireAdmin, upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió ninguna imagen.' });
-  const url = `/uploads/${req.file.filename}`;
-  res.json({ url });
+
+  try {
+    if (process.env.CLOUDINARY_URL) {
+      // Subir a Cloudinary (persistente entre deploys)
+      const uploadResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'alebeauty', resource_type: 'image' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      return res.json({ url: uploadResult.secure_url });
+    } else {
+      // Fallback local para desarrollo sin Cloudinary
+      const ext = path.extname(req.file.originalname);
+      const filename = Date.now().toString(36) + '-' + Math.round(Math.random() * 1e9) + ext;
+      const filepath = path.join(UPLOADS_DIR, filename);
+      await fs.writeFile(filepath, req.file.buffer);
+      return res.json({ url: `/uploads/${filename}` });
+    }
+  } catch (err) {
+    console.error('Error al subir imagen:', err);
+    res.status(500).json({ error: 'No se pudo subir la imagen.' });
+  }
 });
 
 // ==========================================================================

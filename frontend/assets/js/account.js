@@ -1,78 +1,7 @@
-function formatCurrency(n){
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
-}
-
-function escapeHTML(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// Global Toast System
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  if (!container) return;
-  
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  
-  let icon = 'ℹ️';
-  if (type === 'success') icon = '✓';
-  if (type === 'error') icon = '⚠️';
-  
-  toast.innerHTML = `
-    <span style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:1.1rem; font-weight:bold;">${icon}</span>
-      <span>${message}</span>
-    </span>
-    <button class="toast-close">✕</button>
-  `;
-  container.appendChild(toast);
-  
-  const closeBtn = toast.querySelector('.toast-close');
-  closeBtn.addEventListener('click', () => {
-    toast.classList.add('fade-out');
-    setTimeout(() => toast.remove(), 400);
-  });
-  
-  setTimeout(() => {
-    if (toast.parentNode) {
-      toast.classList.add('fade-out');
-      setTimeout(() => toast.remove(), 400);
-    }
-  }, 4000);
-}
-
-// Theme Persistence
-const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
-
-function applySavedTheme() {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    body.classList.add('dark-mode');
-    if (themeToggle) themeToggle.textContent = '☀️';
-  } else {
-    body.classList.remove('dark-mode');
-    if (themeToggle) themeToggle.textContent = '🌙';
-  }
-}
-
-themeToggle?.addEventListener('click', () => {
-  if (body.classList.contains('dark-mode')) {
-    body.classList.remove('dark-mode');
-    localStorage.setItem('theme', 'light');
-    themeToggle.textContent = '🌙';
-  } else {
-    body.classList.add('dark-mode');
-    localStorage.setItem('theme', 'dark');
-    themeToggle.textContent = '☀️';
-  }
-});
+// ============================================================
+// account.js — Lógica de perfil y cuenta de cliente
+// (formatCurrency, escapeHTML, showToast, applySavedTheme, themeToggle → utils.js)
+// ============================================================
 
 // Update Cart Count
 const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -137,47 +66,46 @@ async function loadProfileAndHistory(token) {
     const res = await fetch('/api/users/me', {
       headers: { Authorization: `Bearer ${token}` }
     });
-    
+
     if (!res.ok) {
-      // Token might be expired
+      // Token expirado o inválido
       localStorage.removeItem('clientToken');
       localStorage.removeItem('clientUser');
       checkAuth();
       return;
     }
-    
+
     const data = await res.json();
     const user = data.user;
     const orders = data.orders;
-    
+
     // Set profile info
     profName.textContent = `${user.firstName} ${user.lastName}`;
     if (profDocumentId) profDocumentId.textContent = user.documentId || 'No registrado';
     profEmail.textContent = user.email;
     profPhone.textContent = user.phone;
     profAddress.textContent = user.address || 'Sin dirección registrada';
-    
+
     // Render orders
     if (orders.length === 0) {
       customerOrdersList.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:32px;">Aún no has realizado ningún pedido.</p>`;
       return;
     }
-    
+
     customerOrdersList.innerHTML = orders.map(o => {
       let statusClass = 'status-pending';
       let statusText = o.status;
-      if (o.status === 'pending') { statusClass = 'status-pending'; statusText = 'Pendiente 🕒'; }
+      if (o.status === 'pending')    { statusClass = 'status-pending';    statusText = 'Pendiente 🕒'; }
       else if (o.status === 'processing') { statusClass = 'status-processing'; statusText = 'Preparando 📦'; }
-      else if (o.status === 'shipped') { statusClass = 'status-shipped'; statusText = 'Despachado 🚚'; }
-      else if (o.status === 'delivered') { statusClass = 'status-delivered'; statusText = 'Entregado 🟢'; }
-      else if (o.status === 'cancelled') { statusClass = 'status-cancelled'; statusText = 'Cancelado ✕'; }
-      
+      else if (o.status === 'shipped')    { statusClass = 'status-shipped';    statusText = 'Despachado 🚚'; }
+      else if (o.status === 'delivered')  { statusClass = 'status-delivered';  statusText = 'Entregado 🟢'; }
+      else if (o.status === 'cancelled')  { statusClass = 'status-cancelled';  statusText = 'Cancelado ✕'; }
+
       const totalItemsQty = o.items.reduce((sum, item) => sum + item.qty, 0);
       const itemsSummaryText = `${totalItemsQty} ${totalItemsQty === 1 ? 'artículo' : 'artículos'}`;
-      
-      let paymentText = o.payment;
-      if (o.payment === 'cash') paymentText = 'Efectivo / Contraentrega 💵';
-      else if (o.payment === 'transfer') paymentText = 'Transferencia Bancaria 🏦';
+
+      // Etiqueta de pago unificada (#12)
+      const paymentText = getPaymentLabel(o.payment);
 
       return `
         <div class="account-order-card">
@@ -210,7 +138,7 @@ async function loadProfileAndHistory(token) {
                 <p>${escapeHTML(o.buyer.phone) || 'No registrado'}</p>
               </div>
             </div>
-            
+
             <div class="order-products-table-wrapper">
               <table class="order-products-table">
                 <thead>
@@ -233,7 +161,7 @@ async function loadProfileAndHistory(token) {
                 </tbody>
               </table>
             </div>
-            
+
             <div class="details-footer">
               <div class="order-total-sum">
                 Total del Pedido: <strong>${formatCurrency(o.total)}</strong>
@@ -246,7 +174,7 @@ async function loadProfileAndHistory(token) {
         </div>
       `;
     }).join('');
-    
+
   } catch (err) {
     showToast('Error al cargar la información del perfil.', 'error');
   }
@@ -265,35 +193,30 @@ clientRegisterForm?.addEventListener('submit', async (e) => {
     address: fd.get('address').trim(),
     documentId: fd.get('documentId').trim()
   };
-  
+
   try {
     const res = await fetch('/api/users/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    
+
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.error || 'Fallo al crear la cuenta.');
     }
-    
+
     showToast('¡Cuenta creada correctamente! Ahora puedes iniciar sesión.', 'success');
-    
-    // Switch to login card and prefill the email
+
     registerCard.style.display = 'none';
     loginCard.style.display = 'block';
-    
+
     const loginEmailInput = clientLoginForm.querySelector('input[name="email"]');
-    if (loginEmailInput) {
-      loginEmailInput.value = payload.email;
-    }
-    
+    if (loginEmailInput) loginEmailInput.value = payload.email;
+
     const loginPasswordInput = clientLoginForm.querySelector('input[name="password"]');
-    if (loginPasswordInput) {
-      loginPasswordInput.focus();
-    }
-    
+    if (loginPasswordInput) loginPasswordInput.focus();
+
     clientRegisterForm.reset();
   } catch (err) {
     showToast(err.message, 'error');
@@ -308,31 +231,31 @@ clientLoginForm?.addEventListener('submit', async (e) => {
     email: fd.get('email').trim(),
     password: fd.get('password').trim()
   };
-  
+
   try {
     const res = await fetch('/api/users/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    
+
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.error || 'Credenciales inválidas.');
     }
-    
+
     const data = await res.json();
     localStorage.setItem('clientToken', data.token);
     localStorage.setItem('clientUser', JSON.stringify(data.user));
     showToast('Sesión iniciada con éxito.', 'success');
-    
-    // Save info for checkout forms
+
+    // Guardar datos para auto-rellenar checkout
     localStorage.setItem('last_firstName', data.user.firstName);
     localStorage.setItem('last_lastName', data.user.lastName);
     localStorage.setItem('last_phone', data.user.phone);
     localStorage.setItem('last_address', data.user.address);
     localStorage.setItem('last_documentId', data.user.documentId || '');
-    
+
     checkAuth();
   } catch (err) {
     showToast(err.message, 'error');
@@ -352,15 +275,9 @@ customerOrdersList?.addEventListener('click', (e) => {
   const header = e.target.closest('.account-order-header');
   if (header) {
     const card = header.closest('.account-order-card');
-    if (card) {
-      card.classList.toggle('active');
-    }
+    if (card) card.classList.toggle('active');
   }
 });
-
-// Initialize on Load
-applySavedTheme();
-checkAuth();
 
 // Restringir entrada en tiempo real según el tipo de campo
 document.addEventListener('input', (e) => {
@@ -371,3 +288,7 @@ document.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'\-]/g, '');
   }
 });
+
+// Initialize on Load
+applySavedTheme();
+checkAuth();

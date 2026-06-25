@@ -1,82 +1,11 @@
+// ============================================================
+// admin.js — Panel de administración
+// (formatCurrency, escapeHTML, showToast, applySavedTheme, themeToggle → utils.js)
+// ============================================================
+
 const apiUrl = '/api/products';
 const adminStatus = document.getElementById('adminStatus');
 
-function formatCurrency(n){
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
-}
-
-function escapeHTML(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// Global Toast System
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  if (!container) return;
-  
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  
-  let icon = 'ℹ️';
-  if (type === 'success') icon = '✓';
-  if (type === 'error') icon = '⚠️';
-  
-  toast.innerHTML = `
-    <span style="display:flex; align-items:center; gap:8px;">
-      <span style="font-size:1.1rem; font-weight:bold;">${icon}</span>
-      <span>${message}</span>
-    </span>
-    <button class="toast-close">✕</button>
-  `;
-  
-  container.appendChild(toast);
-  
-  const closeBtn = toast.querySelector('.toast-close');
-  closeBtn.addEventListener('click', () => {
-    toast.classList.add('fade-out');
-    setTimeout(() => toast.remove(), 400);
-  });
-  
-  setTimeout(() => {
-    if (toast.parentNode) {
-      toast.classList.add('fade-out');
-      setTimeout(() => toast.remove(), 400);
-    }
-  }, 4000);
-}
-
-// Theme Persistence & Switcher
-const body = document.body;
-const themeToggle = document.getElementById('themeToggle');
-
-function applySavedTheme() {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    body.classList.add('dark-mode');
-    if (themeToggle) themeToggle.textContent = '☀️';
-  } else {
-    body.classList.remove('dark-mode');
-    if (themeToggle) themeToggle.textContent = '🌙';
-  }
-}
-
-themeToggle?.addEventListener('click', () => {
-  if (body.classList.contains('dark-mode')) {
-    body.classList.remove('dark-mode');
-    localStorage.setItem('theme', 'light');
-    themeToggle.textContent = '🌙';
-  } else {
-    body.classList.add('dark-mode');
-    localStorage.setItem('theme', 'dark');
-    themeToggle.textContent = '☀️';
-  }
-});
 
 // Admin Authentication Helpers
 function getAdminToken() {

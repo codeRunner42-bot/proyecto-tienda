@@ -3,7 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Detalles de tu pedido recibido en Ale Beauty Art. Conserva esta página o compártela por WhatsApp para finalizar tu compra.">
   <title>¡Pedido Recibido! - Ale Beauty Art</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F484;</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
@@ -155,7 +157,7 @@
     <div class="main-header page-wrapper">
       <div class="header-side"></div>
       <a class="brand-logo" href="index.html">
-        <div class="logo-badge">AB</div>
+        <img src="assets/images/logo.jpg" alt="Logo" class="logo-badge" style="object-fit: cover;">
         <span class="logo-text">Ale Beauty Art</span>
       </a>
       <div class="header-actions">
@@ -172,7 +174,7 @@
     <div class="invoice-card" id="invoiceCard">
       <div class="invoice-header">
         <div class="invoice-logo">
-          <div class="logo-badge" style="width:50px; height:50px; font-size:1.4rem;">AB</div>
+          <img src="assets/images/logo.jpg" alt="Logo" class="logo-badge" style="width:70px; height:70px; object-fit: cover;">
           <span class="logo-text" style="font-size:1.3rem;">Ale Beauty Art</span>
         </div>
         <div class="invoice-meta">
@@ -240,46 +242,11 @@
     <div>Conéctate con nosotros: <a href="https://www.instagram.com/ale.beautyart/" target="_blank">Instagram</a></div>
   </footer>
 
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/utils.js"></script>
   <script>
-    // Theme Switcher Logic
-    const themeToggle = document.getElementById('themeToggle');
-    const body = document.body;
-    function applySavedTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
-        body.classList.add('dark-mode');
-        if (themeToggle) themeToggle.textContent = '☀️';
-      } else {
-        body.classList.remove('dark-mode');
-        if (themeToggle) themeToggle.textContent = '🌙';
-      }
-    }
-    themeToggle?.addEventListener('click', () => {
-      if (body.classList.contains('dark-mode')) {
-        body.classList.remove('dark-mode');
-        localStorage.setItem('theme', 'light');
-        themeToggle.textContent = '🌙';
-      } else {
-        body.classList.add('dark-mode');
-        localStorage.setItem('theme', 'dark');
-        themeToggle.textContent = '☀️';
-      }
-    });
+    // Initialize Theme
     applySavedTheme();
-
-    function formatCurrency(n){
-      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
-    }
-
-    function escapeHTML(str) {
-      if (str == null) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
 
     // Load invoice data from query params or localStorage
     const params = new URLSearchParams(window.location.search);
