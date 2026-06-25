@@ -234,13 +234,13 @@ app.post('/api/admin/login', async (req, res) => {
   res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
 });
 
-// Image Upload endpoint (Admin only) — sube a Cloudinary si está configurado
+// Image Upload endpoint (Admin only) — sube a Cloudinary si está configurado, con fallback local
 app.post('/api/upload-image', requireAdmin, upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió ninguna imagen.' });
 
-  try {
-    if (process.env.CLOUDINARY_URL) {
-      // Subir a Cloudinary (persistente entre deploys)
+  // Intentar subir a Cloudinary si está configurado
+  if (process.env.CLOUDINARY_URL) {
+    try {
       const uploadResult = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           { folder: 'alebeauty', resource_type: 'image' },
@@ -252,17 +252,23 @@ app.post('/api/upload-image', requireAdmin, upload.single('image'), async (req, 
         stream.end(req.file.buffer);
       });
       return res.json({ url: uploadResult.secure_url });
-    } else {
-      // Fallback local para desarrollo sin Cloudinary
-      const ext = path.extname(req.file.originalname);
-      const filename = Date.now().toString(36) + '-' + Math.round(Math.random() * 1e9) + ext;
-      const filepath = path.join(UPLOADS_DIR, filename);
-      await fs.writeFile(filepath, req.file.buffer);
-      return res.json({ url: `/uploads/${filename}` });
+    } catch (cloudinaryErr) {
+      // Cloudinary falló — registrar el error real y usar fallback local
+      console.error('Cloudinary falló, usando almacenamiento local:', cloudinaryErr.message || cloudinaryErr);
     }
-  } catch (err) {
-    console.error('Error al subir imagen:', err);
-    res.status(500).json({ error: 'No se pudo subir la imagen.' });
+  }
+
+  // Fallback: guardar localmente en /uploads/
+  try {
+    await fs.mkdir(UPLOADS_DIR, { recursive: true });
+    const ext = path.extname(req.file.originalname) || '.jpg';
+    const filename = Date.now().toString(36) + '-' + Math.round(Math.random() * 1e9) + ext;
+    const filepath = path.join(UPLOADS_DIR, filename);
+    await fs.writeFile(filepath, req.file.buffer);
+    return res.json({ url: `/uploads/${filename}` });
+  } catch (localErr) {
+    console.error('Error al guardar imagen localmente:', localErr);
+    return res.status(500).json({ error: 'No se pudo subir la imagen. Verifica las credenciales de Cloudinary o los permisos del servidor.' });
   }
 });
 
