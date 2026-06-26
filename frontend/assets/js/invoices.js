@@ -468,6 +468,16 @@ if (invoiceForm) invoiceForm.addEventListener('submit', async function(e) {
 
   if (!order_id) { showToast('Selecciona un pedido.', 'error'); return; }
 
+  if (isNaN(tax_percent) || tax_percent < 0 || tax_percent > 100) {
+    showToast('El porcentaje de IVA debe estar entre 0 y 100.', 'error');
+    return;
+  }
+
+  if (notes && notes.length > 500) {
+    showToast('Las notas no pueden exceder los 500 caracteres.', 'error');
+    return;
+  }
+
   try {
     const res = await fetch('/api/invoices', {
       method: 'POST',

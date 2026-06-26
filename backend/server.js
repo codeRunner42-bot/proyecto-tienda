@@ -1276,6 +1276,17 @@ app.post('/api/invoices', requireAdmin, async (req, res) => {
     const { order_id, tax_percent, notes } = req.body || {};
     if (!order_id) return res.status(400).json({ error: 'El ID del pedido es obligatorio.' });
 
+    if (tax_percent != null) {
+      const parsedTax = Number(tax_percent);
+      if (isNaN(parsedTax) || parsedTax < 0 || parsedTax > 100) {
+        return res.status(400).json({ error: 'El porcentaje de IVA debe ser un número entre 0 y 100.' });
+      }
+    }
+
+    if (notes && (typeof notes !== 'string' || notes.trim().length > 500)) {
+      return res.status(400).json({ error: 'Las notas no pueden exceder los 500 caracteres.' });
+    }
+
     // Check order exists
     const orderResult = await pool.query('SELECT * FROM orders WHERE id = $1', [order_id]);
     const order = orderResult.rows[0];
@@ -1325,6 +1336,12 @@ app.put('/api/invoices/:id', requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'Estado de factura no válido.' });
     }
 
+    if (notes !== undefined && notes !== null) {
+      if (typeof notes !== 'string' || notes.trim().length > 500) {
+        return res.status(400).json({ error: 'Las notas no pueden exceder los 500 caracteres.' });
+      }
+    }
+
     const newStatus = status || inv.status;
     const newNotes = notes !== undefined ? String(notes).trim() : inv.notes;
     const paidAt = newStatus === 'paid' && inv.status !== 'paid'
@@ -1363,8 +1380,77 @@ app.post('/api/orders/direct', requireAdmin, async (req, res) => {
     const payload = req.body || {};
     const { buyer, items, payments, tax_percent, notes } = payload;
 
+    // 1. Items array basic validation
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'Debe agregar al menos un producto a la venta.' });
+    }
+
+    // 2. Tax percent range and numeric validation
+    if (tax_percent != null) {
+      const parsedTax = Number(tax_percent);
+      if (isNaN(parsedTax) || parsedTax < 0 || parsedTax > 100) {
+        return res.status(400).json({ error: 'El porcentaje de IVA debe ser un número entre 0 y 100.' });
+      }
+    }
+
+    // 3. Buyer fields length and format validations (optional fields)
+    if (buyer) {
+      if (buyer.firstName && (typeof buyer.firstName !== 'string' || buyer.firstName.trim().length > 50)) {
+        return res.status(400).json({ error: 'El nombre del cliente no puede exceder los 50 caracteres.' });
+      }
+      if (buyer.lastName && (typeof buyer.lastName !== 'string' || buyer.lastName.trim().length > 50)) {
+        return res.status(400).json({ error: 'El apellido del cliente no puede exceder los 50 caracteres.' });
+      }
+      if (buyer.documentId && buyer.documentId.trim() !== '') {
+        if (typeof buyer.documentId !== 'string' || !DOCUMENT_REGEX.test(buyer.documentId.trim())) {
+          return res.status(400).json({ error: 'La cédula del cliente debe contener únicamente números y tener entre 5 y 15 dígitos.' });
+        }
+      }
+      if (buyer.phone && buyer.phone.trim() !== '') {
+        if (typeof buyer.phone !== 'string' || !PHONE_REGEX.test(buyer.phone.trim())) {
+          return res.status(400).json({ error: 'El teléfono del cliente debe contener únicamente números y tener entre 7 y 15 dígitos.' });
+        }
+      }
+      if (buyer.address && (typeof buyer.address !== 'string' || buyer.address.trim().length > 150)) {
+        return res.status(400).json({ error: 'La dirección no puede exceder los 150 caracteres.' });
+      }
+    }
+
+    // 4. Notes validation
+    if (notes && (typeof notes !== 'string' || notes.trim().length > 500)) {
+      return res.status(400).json({ error: 'Las notas no pueden exceder los 500 caracteres.' });
+    }
+
+    // 5. Payments list validation
+    if (payments) {
+      if (!Array.isArray(payments)) {
+        return res.status(400).json({ error: 'El listado de pagos debe ser un arreglo válido.' });
+      }
+      const validMethods = ['Efectivo', 'Nequi', 'Transferencia'];
+      for (const p of payments) {
+        if (!p.method || !validMethods.includes(p.method)) {
+          return res.status(400).json({ error: `Método de pago no válido: "${p.method}". Permitidos: ${validMethods.join(', ')}` });
+        }
+        const amt = Number(p.amount);
+        if (isNaN(amt) || amt < 0) {
+          return res.status(400).json({ error: 'El monto de pago debe ser un número mayor o igual a cero.' });
+        }
+      }
+    }
+
+    // 6. Items structure & types validation
+    for (const item of items) {
+      if (!item.id || typeof item.id !== 'string') {
+        return res.status(400).json({ error: 'Cada artículo de la venta debe tener un ID de producto válido.' });
+      }
+      const qty = Number(item.qty);
+      if (isNaN(qty) || qty <= 0 || !Number.isInteger(qty)) {
+        return res.status(400).json({ error: `La cantidad para el producto con ID "${item.id}" debe ser un entero positivo.` });
+      }
+      const price = Number(item.price);
+      if (isNaN(price) || price < 0) {
+        return res.status(400).json({ error: `El precio para el producto con ID "${item.id}" debe ser un número válido.` });
+      }
     }
 
     const firstName = (buyer && buyer.firstName) ? String(buyer.firstName).trim() : 'Cliente';

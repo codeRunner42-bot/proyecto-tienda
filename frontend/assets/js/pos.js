@@ -322,6 +322,47 @@
       return;
     }
 
+    // Client fields client-side validation
+    const fname = posClientFirstName.value.trim();
+    const lname = posClientLastName.value.trim();
+    const docId = posClientDoc.value.trim();
+    const phoneVal = posClientPhone.value.trim();
+    const notesVal = posNotes.value.trim();
+
+    if (fname && fname.length > 50) {
+      showToast('El nombre del cliente no puede superar los 50 caracteres.', 'error');
+      return;
+    }
+    if (lname && lname.length > 50) {
+      showToast('El apellido del cliente no puede superar los 50 caracteres.', 'error');
+      return;
+    }
+
+    const DOC_REGEX = /^\d{5,15}$/;
+    const PH_REGEX = /^\d{7,15}$/;
+
+    if (docId && !DOC_REGEX.test(docId)) {
+      showToast('El documento/cédula debe contener únicamente números y tener entre 5 y 15 dígitos.', 'error');
+      return;
+    }
+    if (phoneVal && !PH_REGEX.test(phoneVal)) {
+      showToast('El teléfono debe contener únicamente números y tener entre 7 y 15 dígitos.', 'error');
+      return;
+    }
+
+    if (notesVal && notesVal.length > 500) {
+      showToast('Las notas no pueden exceder los 500 caracteres.', 'error');
+      return;
+    }
+
+    // Payment inputs validation
+    for (const p of payments) {
+      if (isNaN(p.amount) || p.amount < 0) {
+        showToast('Los montos de pago registrados deben ser números válidos mayores o iguales a cero.', 'error');
+        return;
+      }
+    }
+
     const totalVal = getPOSOrderTotal();
     const currentPaid = payments.reduce((sum, p) => sum + p.amount, 0);
     
@@ -452,6 +493,14 @@
         }
       }
     });
+  });
+
+  // On-the-fly input validations for numbers only
+  posClientDoc.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g, '');
+  });
+  posClientPhone.addEventListener('input', e => {
+    e.target.value = e.target.value.replace(/\D/g, '');
   });
 
   // Init payments row on file load
