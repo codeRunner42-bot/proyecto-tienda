@@ -1357,6 +1357,177 @@ app.delete('/api/invoices/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// CREATE direct sale (POS) (Admin only)
+app.post('/api/orders/direct', requireAdmin, async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const { buyer, items, payments, tax_percent, notes } = payload;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Debe agregar al menos un producto a la venta.' });
+    }
+
+    const firstName = (buyer && buyer.firstName) ? String(buyer.firstName).trim() : 'Cliente';
+    const lastName = (buyer && buyer.lastName) ? String(buyer.lastName).trim() : 'de mostrador';
+    const documentId = (buyer && buyer.documentId) ? String(buyer.documentId).trim() : '';
+    const phone = (buyer && buyer.phone) ? String(buyer.phone).trim() : '';
+    const address = (buyer && buyer.address) ? String(buyer.address).trim() : 'Venta Directa';
+
+    const subtotal = Number(items.reduce((sum, item) => sum + (Number(item.price) * Number(item.qty || 0)), 0));
+    const taxRate = Math.max(0, Math.min(100, Number(tax_percent || 0)));
+    const tax = parseFloat((subtotal * taxRate / 100).toFixed(2));
+    const total = parseFloat((subtotal + tax).toFixed(2));
+
+    // Process payments details
+    let paymentText = '';
+    let totalPaid = 0;
+    if (payments && Array.isArray(payments) && payments.length > 0) {
+      const paymentParts = [];
+      for (const p of payments) {
+        const amt = Number(p.amount || 0);
+        if (amt > 0) {
+          totalPaid += amt;
+          paymentParts.push(`${p.method}: ${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amt)}`);
+        }
+      }
+      if (paymentParts.length > 0) {
+        paymentText = 'Pago Mixto (' + paymentParts.join(', ') + ')';
+      } else {
+        paymentText = 'Pendiente';
+      }
+    } else {
+      paymentText = 'Pendiente';
+    }
+
+    // Determine status
+    const isPaid = totalPaid >= total;
+    const invoiceStatus = isPaid ? 'paid' : 'pending';
+    const paidAt = isPaid ? new Date().toISOString() : null;
+
+    const orderId = generateOrderId();
+    const invoiceId = 'inv-' + Date.now().toString(36) + Math.floor(Math.random() * 9999).toString(36);
+    const createdAt = new Date().toISOString();
+
+    // Prepare note with payment breakdown
+    let finalNotes = notes || '';
+    const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+    const paymentBreakdown = `[Detalle Pago: Total: ${formatter.format(total)} | Pagado: ${formatter.format(totalPaid)} | Resta: ${formatter.format(Math.max(0, total - totalPaid))}]`;
+    if (finalNotes) {
+      finalNotes = `${finalNotes}\n${paymentBreakdown}`;
+    } else {
+      finalNotes = paymentBreakdown;
+    }
+
+    // Connect to pg and start transaction
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const itemsToUpdate = [];
+      for (const item of items) {
+        const productResult = await client.query('SELECT * FROM products WHERE id = $1', [String(item.id)]);
+        const product = productResult.rows[0];
+        if (!product) {
+          throw new Error(`El producto "${item.name || item.id}" no existe.`);
+        }
+        if (typeof product.stock === 'number') {
+          if (product.stock < Number(item.qty)) {
+            throw new Error(`Stock insuficiente para "${product.name}". Disponible: ${product.stock}, solicitado: ${item.qty}`);
+          }
+          itemsToUpdate.push({ product, qty: Number(item.qty) });
+        }
+      }
+
+      // Update product stock
+      for (const update of itemsToUpdate) {
+        const newStock = update.product.stock - update.qty;
+        await client.query('UPDATE products SET stock = $1 WHERE id = $2', [newStock, update.product.id]);
+      }
+
+      // Insert Order
+      await client.query(
+        `INSERT INTO orders (id, user_id, "firstName", "lastName", "documentId", phone, address, payment, items, total, status, "createdAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        [
+          orderId,
+          null,
+          firstName,
+          lastName,
+          documentId,
+          phone,
+          address,
+          paymentText,
+          JSON.stringify(items.map(item => ({
+            id: String(item.id),
+            name: String(item.name),
+            price: Number(item.price),
+            qty: Number(item.qty)
+          }))),
+          total,
+          'delivered', // Venta directa se entrega inmediatamente
+          createdAt
+        ]
+      );
+
+      // Generate Invoice number inside Tx
+      const year = new Date(createdAt).getFullYear();
+      const numResult = await client.query(
+        `SELECT number FROM invoices WHERE number LIKE $1 ORDER BY number DESC LIMIT 1`,
+        [`FAC-${year}-%`]
+      );
+      let invoiceNumber = `FAC-${year}-001`;
+      if (numResult.rows.length > 0) {
+        const last = numResult.rows[0].number;
+        const lastNum = parseInt(last.split('-')[2], 10);
+        invoiceNumber = `FAC-${year}-${String(lastNum + 1).padStart(3, '0')}`;
+      }
+
+      // Insert Invoice
+      await client.query(
+        `INSERT INTO invoices (id, order_id, number, status, subtotal, tax, total, notes, "createdAt", "paidAt")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [invoiceId, orderId, invoiceNumber, invoiceStatus, subtotal, tax, total, finalNotes, createdAt, paidAt]
+      );
+
+      await client.query('COMMIT');
+
+      res.status(201).json({
+        order: {
+          id: orderId,
+          buyer: { firstName, lastName, documentId, phone, address },
+          payment: paymentText,
+          items,
+          total,
+          status: 'delivered',
+          createdAt
+        },
+        invoice: {
+          id: invoiceId,
+          order_id: orderId,
+          number: invoiceNumber,
+          status: invoiceStatus,
+          subtotal,
+          tax,
+          total,
+          notes: finalNotes,
+          createdAt,
+          paidAt
+        }
+      });
+
+    } catch (txError) {
+      await client.query('ROLLBACK');
+      console.error('Error en transacción de venta directa:', txError);
+      return res.status(400).json({ error: txError.message });
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Error al registrar venta directa:', error);
+    res.status(500).json({ error: 'No se pudo registrar la venta directa.' });
+  }
+});
+
 // Launch server
 async function start() {
   await ensureUploadDir();

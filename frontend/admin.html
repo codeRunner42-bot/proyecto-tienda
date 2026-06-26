@@ -25,6 +25,7 @@
         <button class="nav-item" data-tab="products">📦 Productos</button>
         <button class="nav-item" data-tab="orders">🛒 Pedidos</button>
         <button class="nav-item" data-tab="invoices">🧾 Facturación</button>
+        <button class="nav-item" data-tab="pos">🏪 Venta Directa</button>
         <button class="nav-item" data-tab="users">👥 Clientes</button>
         <button class="nav-item" data-tab="reviews">💬 Opiniones</button>
       </nav>
@@ -393,6 +394,130 @@
         </div>
       </section>
 
+      <!-- PESTAÑA: PUNTO DE VENTA (POS) -->
+      <section class="tab-pane" id="tab-pos">
+        <div class="pos-wrapper" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; min-height: calc(100vh - 140px); align-items: start;">
+          
+          <!-- COLUMNA IZQUIERDA: CATÁLOGO -->
+          <div class="pos-catalog-panel" style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); display: flex; flex-direction: column; gap: 16px; height: 100%; min-height: 600px;">
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <h2 style="font-size: 1.3rem; color: var(--accent-strong); margin: 0; flex: 1;">🏪 Catálogo de Productos</h2>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="posSearch" placeholder="Buscar producto..." style="padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.85rem; width: 180px; outline: none;">
+                <select id="posCategoryFilter" style="padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.85rem; outline: none; cursor: pointer;">
+                  <option value="">Todas las categorías</option>
+                </select>
+              </div>
+            </div>
+            
+            <div id="posCatalogGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; overflow-y: auto; max-height: 520px; padding-right: 4px;">
+              <!-- Tarjetas dinámicas -->
+            </div>
+          </div>
+          
+          <!-- COLUMNA DERECHA: CARRITO Y PAGO -->
+          <div class="pos-checkout-panel" style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- CARRITO -->
+            <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+              <h3 style="font-size: 1.1rem; color: var(--accent-strong); margin-top: 0; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <span>🛒 Detalle de Venta</span>
+                <button id="posClearCart" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; color: var(--text-muted);">Vaciar</button>
+              </h3>
+              
+              <div style="max-height: 220px; overflow-y: auto; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted);">
+                      <th style="padding: 6px 0;">Producto</th>
+                      <th style="padding: 6px 0; text-align: center; width: 60px;">Cant</th>
+                      <th style="padding: 6px 0; text-align: right; width: 80px;">Unit</th>
+                      <th style="padding: 6px 0; text-align: right; width: 80px;">Total</th>
+                      <th style="padding: 6px 0; width: 30px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="posCartBody">
+                    <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">El carrito está vacío. Agrega productos del catálogo.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Impuestos e IVA -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem;">
+                <span style="color: var(--text-muted);">Subtotal:</span>
+                <span id="posSubtotal" style="font-weight: 600;">$0</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="color: var(--text-muted);">IVA %:</span>
+                  <input type="number" id="posTaxPercent" min="0" max="100" value="0" style="width: 50px; padding: 2px 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; text-align: center; background: var(--bg-primary); outline: none;">
+                </div>
+                <span id="posTaxAmount" style="font-weight: 600;">$0</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 2px dashed var(--border-color); font-size: 1.1rem; font-weight: 700; color: var(--accent-strong);">
+                <span>TOTAL:</span>
+                <span id="posTotal">$0</span>
+              </div>
+            </div>
+            
+            <!-- DATOS DEL CLIENTE -->
+            <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+              <h3 style="font-size: 1.1rem; color: var(--accent-strong); margin-top: 0; margin-bottom: 16px;">👥 Datos del Cliente (Opcional)</h3>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Nombre</label>
+                  <input type="text" id="posClientFirstName" placeholder="Ej. Juan" style="padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.85rem; outline: none;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Apellido</label>
+                  <input type="text" id="posClientLastName" placeholder="Ej. Pérez" style="padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.85rem; outline: none;">
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Cédula</label>
+                  <input type="text" id="posClientDoc" placeholder="Solo números" style="padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.85rem; outline: none;">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Teléfono</label>
+                  <input type="text" id="posClientPhone" placeholder="Solo números" style="padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.85rem; outline: none;">
+                </div>
+              </div>
+            </div>
+            
+            <!-- MÉTODOS DE PAGO Y ABONOS -->
+            <div style="background: var(--surface); padding: 24px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+              <h3 style="font-size: 1.1rem; color: var(--accent-strong); margin-top: 0; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span>💵 Registro de Pagos</span>
+                <button id="posAddPaymentRow" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem;">+ Agregar Pago</button>
+              </h3>
+              
+              <div id="posPaymentRowsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                <!-- Filas de pago dinámicas -->
+              </div>
+              
+              <!-- Estado de Balance de Pago -->
+              <div id="posPaymentStatusBox" style="background: var(--bg-primary); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Total Registrado:</span>
+                  <span id="posTotalPaid" style="font-weight: 700;">$0</span>
+                </div>
+                <div id="posBalanceRow" style="display: flex; justify-content: space-between;">
+                  <!-- Dinámico Resta / Vuelto -->
+                </div>
+              </div>
+              
+              <textarea id="posNotes" placeholder="Notas adicionales de la venta..." style="margin-top: 12px; padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.85rem; width: 100%; min-height: 50px; resize: vertical; outline: none;"></textarea>
+              
+              <button id="posSubmitSaleBtn" class="btn btn-primary" style="width: 100%; margin-top: 16px; padding: 14px; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                <span>🛒 Registrar Venta y Generar Factura</span>
+              </button>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -404,5 +529,6 @@
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/admin.js"></script>
   <script src="assets/js/invoices.js"></script>
+  <script src="assets/js/pos.js"></script>
 </body>
 </html>

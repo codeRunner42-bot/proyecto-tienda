@@ -53,6 +53,8 @@ tabButtons.forEach(btn => {
       dashboard: 'Dashboard',
       products: 'Gestión de Productos',
       orders: 'Gestión de Pedidos',
+      invoices: 'Gestión de Facturas',
+      pos: 'Punto de Venta (Venta Directa)',
       users: 'Gestión de Clientes',
       reviews: 'Moderación de Opiniones'
     };
