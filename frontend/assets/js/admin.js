@@ -316,6 +316,7 @@ function fillForm(product) {
   formTitle.textContent = 'Editar producto';
   productFormWrapper.style.display = 'block';
   showStatus(`Editando producto: "${product.name}" (${product.id}).`, 'info');
+  productFormWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function createProduct(data) {
