@@ -22,8 +22,8 @@ if (process.env.CLOUDINARY_URL) {
     cloudinaryUrl = cloudinaryUrl.replace('CLOUDINARY_URL=', '').trim();
   }
   // Quitar comillas si las tuviera (común al pegar en algunos entornos)
-  if ((cloudinaryUrl.startsWith('"') && cloudinaryUrl.endsWith('"')) || 
-      (cloudinaryUrl.startsWith("'") && cloudinaryUrl.endsWith("'"))) {
+  if ((cloudinaryUrl.startsWith('"') && cloudinaryUrl.endsWith('"')) ||
+    (cloudinaryUrl.startsWith("'") && cloudinaryUrl.endsWith("'"))) {
     cloudinaryUrl = cloudinaryUrl.slice(1, -1).trim();
   }
   process.env.CLOUDINARY_URL = cloudinaryUrl;
@@ -58,6 +58,8 @@ const UPLOADS_DIR = path.join(__dirname, 'uploads');
 
 const ADMIN_USER = process.env.ADMIN_USER || 'admin';
 const ADMIN_PASS_PLAIN = process.env.ADMIN_PASS || '1234';
+const ADMIN_USER_2 = process.env.ADMIN_USER_2 || 'admin2';
+const ADMIN_PASS_PLAIN_2 = process.env.ADMIN_PASS_2 || '1234';
 const JWT_SECRET = process.env.JWT_SECRET || 'ale-beauty-art-secret-key-12345';
 
 // PostgreSQL connection pool
@@ -149,11 +151,13 @@ async function setupDatabase() {
 }
 
 let adminPasswordHash = '';
+let admin2PasswordHash = '';
 
 // Hash plain password on startup
 async function initAdminPassword() {
   adminPasswordHash = await bcrypt.hash(ADMIN_PASS_PLAIN, 10);
-  console.log(`Seguridad de administración inicializada. Usuario: "${ADMIN_USER}".`);
+  admin2PasswordHash = await bcrypt.hash(ADMIN_PASS_PLAIN_2, 10);
+  console.log(`Seguridad de administración inicializada. Usuarios: "${ADMIN_USER}", "${ADMIN_USER_2}".`);
 }
 
 // Migrate data from JSON files to PostgreSQL database if tables are empty
@@ -172,7 +176,7 @@ async function migrateData() {
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
              ON CONFLICT (id) DO NOTHING`,
             [p.id, p.name, p.category, Number(p.price || 0), Number(p.stock || 0),
-             p.description || '', p.image || '', '[]']
+            p.description || '', p.image || '', '[]']
           );
         }
         console.log(`Migración de productos completada. Se migraron ${products.length} productos.`);
@@ -194,9 +198,9 @@ async function migrateData() {
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
              ON CONFLICT (id) DO NOTHING`,
             [o.id, null, o.buyer.firstName || '', o.buyer.lastName || '',
-             o.buyer.phone || '', o.buyer.address || '', o.payment || '',
-             JSON.stringify(o.items || []), Number(o.total || 0),
-             o.status || 'pending', o.createdAt || new Date().toISOString()]
+            o.buyer.phone || '', o.buyer.address || '', o.payment || '',
+            JSON.stringify(o.items || []), Number(o.total || 0),
+            o.status || 'pending', o.createdAt || new Date().toISOString()]
           );
         }
         console.log(`Migración de pedidos completada. Se migraron ${orders.length} pedidos.`);
@@ -238,7 +242,7 @@ function requireAdmin(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.user === ADMIN_USER) {
+    if (decoded.user === ADMIN_USER || decoded.user === ADMIN_USER_2) {
       req.adminUser = decoded.user;
       return next();
     }
@@ -285,6 +289,12 @@ app.post('/api/admin/login', async (req, res) => {
       const token = jwt.sign({ user: ADMIN_USER }, JWT_SECRET, { expiresIn: '8h' });
       return res.json({ token });
     }
+  } else if (user === ADMIN_USER_2) {
+    const match = await bcrypt.compare(pass, admin2PasswordHash);
+    if (match) {
+      const token = jwt.sign({ user: ADMIN_USER_2 }, JWT_SECRET, { expiresIn: '8h' });
+      return res.json({ token });
+    }
   }
   res.status(401).json({ error: 'Usuario o contraseña incorrectos.' });
 });
@@ -329,7 +339,7 @@ app.post('/api/upload-image', requireAdmin, upload.single('image'), async (req, 
     const filename = Date.now().toString(36) + '-' + Math.round(Math.random() * 1e9) + ext;
     const filepath = path.join(UPLOADS_DIR, filename);
     await fs.writeFile(filepath, req.file.buffer);
-    
+
     console.warn('Advertencia: Imagen guardada localmente debido a la falta de CLOUDINARY_URL. Recuerda que se borrará si el servidor se reinicia.');
     return res.json({ url: `/uploads/${filename}` });
   } catch (localErr) {
@@ -397,7 +407,7 @@ app.post('/api/users/register', async (req, res) => {
       `INSERT INTO users (id, email, password, "firstName", "lastName", "documentId", phone, address)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [userId, emailKey, hash, firstName.trim(), lastName.trim(),
-       documentId.trim(), phone.trim(), (address || '').trim()]
+        documentId.trim(), phone.trim(), (address || '').trim()]
     );
 
     const token = jwt.sign({ userId, email: emailKey }, JWT_SECRET, { expiresIn: '30d' });
@@ -592,7 +602,7 @@ app.get('/api/products', async (req, res) => {
       let parsedImages = [];
       try {
         parsedImages = p.images ? JSON.parse(p.images) : [];
-      } catch(e) {
+      } catch (e) {
         parsedImages = p.images ? p.images.split(',').map(s => s.trim()).filter(Boolean) : [];
       }
       return { ...p, images: parsedImages };
@@ -614,7 +624,7 @@ app.get('/api/products/:id', async (req, res) => {
     let parsedImages = [];
     try {
       parsedImages = p.images ? JSON.parse(p.images) : [];
-    } catch(e) {
+    } catch (e) {
       parsedImages = p.images ? p.images.split(',').map(s => s.trim()).filter(Boolean) : [];
     }
 
@@ -665,7 +675,7 @@ app.post('/api/products', requireAdmin, async (req, res) => {
       `INSERT INTO products (id, name, category, price, stock, description, image, images)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [product.id, product.name, product.category, product.price, product.stock,
-       product.description, product.image, product.images]
+      product.description, product.image, product.images]
     );
 
     res.status(201).json({ ...product, images: JSON.parse(product.images) });
@@ -709,13 +719,13 @@ app.put('/api/products/:id', requireAdmin, async (req, res) => {
        SET name = $1, category = $2, price = $3, stock = $4, description = $5, image = $6, images = $7
        WHERE id = $8`,
       [updated.name, updated.category, updated.price, updated.stock,
-       updated.description, updated.image, updated.images, req.params.id]
+      updated.description, updated.image, updated.images, req.params.id]
     );
 
     let parsedImages = [];
     try {
       parsedImages = updated.images ? JSON.parse(updated.images) : [];
-    } catch(e) {
+    } catch (e) {
       parsedImages = updated.images ? updated.images.split(',').map(s => s.trim()).filter(Boolean) : [];
     }
 
@@ -1017,7 +1027,7 @@ app.post('/api/admin/users', requireAdmin, async (req, res) => {
       `INSERT INTO users (id, email, password, "firstName", "lastName", "documentId", phone, address)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [userId, emailKey, hash, firstName.trim(), lastName.trim(),
-       documentId.trim(), phone.trim(), (address || '').trim()]
+        documentId.trim(), phone.trim(), (address || '').trim()]
     );
 
     res.status(201).json({ id: userId, email: emailKey, firstName, lastName, phone, address, documentId });
@@ -1074,7 +1084,7 @@ app.put('/api/admin/users/:id', requireAdmin, async (req, res) => {
        SET email = $1, password = $2, "firstName" = $3, "lastName" = $4, phone = $5, address = $6, "documentId" = $7
        WHERE id = $8`,
       [emailKey, hash, firstName.trim(), lastName.trim(),
-       phone.trim(), (address || '').trim(), documentId.trim(), req.params.id]
+        phone.trim(), (address || '').trim(), documentId.trim(), req.params.id]
     );
 
     res.json({ id: req.params.id, email: emailKey, firstName, lastName, phone, address, documentId });
