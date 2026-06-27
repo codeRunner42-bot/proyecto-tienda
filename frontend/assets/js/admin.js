@@ -75,10 +75,136 @@ const productForm = document.getElementById('productForm');
 const formTitle = document.getElementById('formTitle');
 const newProductBtn = document.getElementById('newProductBtn');
 const cancelEditBtn = document.getElementById('cancelEdit');
-const imagePreview = document.getElementById('imagePreview');
-const imageInput = productForm.querySelector('[name="image"]');
-const imageUpload = document.getElementById('imageUpload');
 const productFormWrapper = document.getElementById('productFormWrapper');
+
+// ── Multi-image uploader state ─────────────────────────────
+// Each entry: { url: string, isUploading: bool, isMain: bool }
+let imgEntries = [];
+
+const imgDropZone    = document.getElementById('imgDropZone');
+const multiUpload    = document.getElementById('multiImageUpload');
+const imgGrid        = document.getElementById('imgThumbnailGrid');
+const hiddenMain     = document.getElementById('hiddenMainImage');
+const hiddenExtras   = document.getElementById('hiddenExtraImages');
+
+// Click drop zone → open file picker
+imgDropZone.addEventListener('click', () => multiUpload.click());
+
+// Drag-and-drop styling
+imgDropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  imgDropZone.style.borderColor = 'var(--accent)';
+  imgDropZone.style.background  = 'var(--accent-light, rgba(139,26,74,0.06))';
+});
+imgDropZone.addEventListener('dragleave', () => {
+  imgDropZone.style.borderColor = '';
+  imgDropZone.style.background  = '';
+});
+imgDropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  imgDropZone.style.borderColor = '';
+  imgDropZone.style.background  = '';
+  if (e.dataTransfer.files.length) handleImageFiles(e.dataTransfer.files);
+});
+multiUpload.addEventListener('change', () => {
+  if (multiUpload.files.length) handleImageFiles(multiUpload.files);
+  multiUpload.value = '';
+});
+
+async function handleImageFiles(files) {
+  for (const file of files) {
+    const idx = imgEntries.length;
+    imgEntries.push({ url: '', isUploading: true, isMain: idx === 0 && imgEntries.length === 0 });
+    renderImgGrid();
+
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: { ...authHeaders() },
+        body: fd,
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Error al subir imagen.');
+      }
+      const data = await res.json();
+      imgEntries[idx].url = data.url;
+      imgEntries[idx].isUploading = false;
+
+      // First image auto-becomes main if nothing is main yet
+      if (!imgEntries.some(e => e.isMain)) imgEntries[idx].isMain = true;
+    } catch (err) {
+      imgEntries.splice(idx, 1);
+      showStatus(err.message, 'error');
+    }
+    renderImgGrid();
+  }
+  syncHiddenFields();
+}
+
+function renderImgGrid() {
+  imgGrid.innerHTML = imgEntries.map((entry, i) => {
+    if (entry.isUploading) {
+      return `
+        <div style="position:relative; width:100px; height:100px; border-radius:10px; border:2px solid var(--border-color); overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--bg-primary);">
+          <div style="font-size:1.4rem; animation: spin 1s linear infinite;">⏳</div>
+        </div>`;
+    }
+    const isMain = entry.isMain;
+    return `
+      <div data-imgidx="${i}" style="position:relative; width:100px; height:100px; border-radius:10px; border:3px solid ${isMain ? 'var(--accent)' : 'var(--border-color)'}; overflow:hidden; box-shadow: ${isMain ? '0 0 0 2px var(--accent)' : 'none'};">
+        <img src="${entry.url}" alt="img" style="width:100%; height:100%; object-fit:cover; display:block;">
+        ${isMain ? '<div style="position:absolute;top:4px;left:4px;background:var(--accent);color:#fff;font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:20px;">PRINCIPAL</div>' : ''}
+        <div style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:2px;background:rgba(0,0,0,0.55);padding:4px;">
+          ${!isMain ? `<button type="button" class="imgSetMain" data-i="${i}" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:0.62rem;cursor:pointer;padding:2px;">⭐ Principal</button>` : ''}
+          <button type="button" class="imgRemove" data-i="${i}" style="flex:1;background:#e74c3c;color:#fff;border:none;border-radius:4px;font-size:0.62rem;cursor:pointer;padding:2px;">🗑 Quitar</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+imgGrid.addEventListener('click', (e) => {
+  const setBtn = e.target.closest('.imgSetMain');
+  const delBtn = e.target.closest('.imgRemove');
+  if (setBtn) {
+    const i = Number(setBtn.dataset.i);
+    imgEntries.forEach((en, idx) => en.isMain = idx === i);
+    renderImgGrid();
+    syncHiddenFields();
+  }
+  if (delBtn) {
+    const i = Number(delBtn.dataset.i);
+    imgEntries.splice(i, 1);
+    // Ensure one stays main
+    if (imgEntries.length > 0 && !imgEntries.some(e => e.isMain)) imgEntries[0].isMain = true;
+    renderImgGrid();
+    syncHiddenFields();
+  }
+});
+
+function syncHiddenFields() {
+  const mainEntry = imgEntries.find(e => e.isMain && e.url);
+  hiddenMain.value  = mainEntry ? mainEntry.url : '';
+  hiddenExtras.value = imgEntries.filter(e => !e.isMain && e.url).map(e => e.url).join(',');
+}
+
+function clearImgEntries() {
+  imgEntries = [];
+  renderImgGrid();
+  syncHiddenFields();
+}
+
+function loadImgEntries(mainUrl, extraUrls) {
+  imgEntries = [];
+  if (mainUrl) imgEntries.push({ url: mainUrl, isUploading: false, isMain: true });
+  (extraUrls || []).forEach(u => {
+    if (u) imgEntries.push({ url: u, isUploading: false, isMain: false });
+  });
+  renderImgGrid();
+  syncHiddenFields();
+}
 
 // Load statistics from database to stats card
 
@@ -176,7 +302,7 @@ function resetForm() {
   productForm.reset();
   productForm.id.value = '';
   formTitle.textContent = 'Agregar producto';
-  imagePreview.src = 'https://via.placeholder.com/400x300?text=Vista+Previa';
+  clearImgEntries();
 }
 
 function fillForm(product) {
@@ -185,10 +311,8 @@ function fillForm(product) {
   productForm.category.value = product.category;
   productForm.price.value = product.price;
   productForm.stock.value = product.stock;
-  productForm.image.value = product.image;
-  productForm.images.value = product.images ? product.images.join(', ') : '';
   productForm.description.value = product.description;
-  imagePreview.src = product.image || 'https://via.placeholder.com/400x300?text=Sin+Imagen';
+  loadImgEntries(product.image, product.images);
   formTitle.textContent = 'Editar producto';
   productFormWrapper.style.display = 'block';
   showStatus(`Editando producto: "${product.name}" (${product.id}).`, 'info');
@@ -232,9 +356,12 @@ async function deleteProduct(id) {
 productForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(productForm);
-  
-  const secondaryImages = formData.get('images').trim() 
-    ? formData.get('images').split(',').map(s => s.trim()).filter(Boolean) 
+
+  syncHiddenFields();
+
+  const mainImage = hiddenMain.value.trim() || 'https://via.placeholder.com/400x300?text=Producto';
+  const extraImages = hiddenExtras.value.trim()
+    ? hiddenExtras.value.split(',').map(s => s.trim()).filter(Boolean)
     : [];
 
   const productData = {
@@ -242,30 +369,13 @@ productForm.addEventListener('submit', async (event) => {
     category: formData.get('category').trim(),
     price: Number(formData.get('price')),
     stock: Number(formData.get('stock')) || 0,
-    image: formData.get('image').trim() || 'https://via.placeholder.com/400x300?text=Producto',
-    images: secondaryImages,
+    image: mainImage,
+    images: extraImages,
     description: formData.get('description').trim(),
   };
-  const imageFile = document.getElementById('imageUpload').files[0];
   const id = formData.get('id');
 
   try {
-    if (imageFile) {
-      const formDataFile = new FormData();
-      formDataFile.append('image', imageFile);
-      const uploadResponse = await fetch('/api/upload-image', {
-        method: 'POST',
-        headers: { ...authHeaders() },
-        body: formDataFile,
-      });
-      if (!uploadResponse.ok) {
-        const error = await uploadResponse.json();
-        throw new Error(error.error || 'No se pudo subir la imagen.');
-      }
-      const uploadData = await uploadResponse.json();
-      productData.image = uploadData.url;
-    }
-
     if (id) {
       await updateProduct(id, productData);
       showStatus('Producto actualizado correctamente.', 'success');
@@ -274,7 +384,6 @@ productForm.addEventListener('submit', async (event) => {
       showStatus('Producto creado correctamente.', 'success');
     }
     
-    // Hide form wrapper and load new data
     productFormWrapper.style.display = 'none';
     resetForm();
     await loadAllData();
@@ -283,23 +392,7 @@ productForm.addEventListener('submit', async (event) => {
   }
 });
 
-// Update image preview from URL
-imageInput.addEventListener('input', () => {
-  const url = imageInput.value.trim() || 'https://via.placeholder.com/400x300?text=Vista+Previa';
-  imagePreview.src = url;
-});
-
-// Update image preview from local file
-imageUpload.addEventListener('change', () => {
-  const file = imageUpload.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imagePreview.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-});
+// (image preview listeners removed — handled by multi-uploader)
 
 adminListBody.addEventListener('click', async (event) => {
   const btn = event.target;

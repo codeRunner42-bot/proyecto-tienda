@@ -201,9 +201,6 @@
             <form id="productForm" class="admin-form">
               <h2 id="formTitle">Agregar producto</h2>
               <input type="hidden" name="id">
-              <div class="image-preview-wrapper" style="text-align: center; margin-bottom: 16px;">
-                <img id="imagePreview" src="https://via.placeholder.com/400x300?text=Vista+Previa" alt="Vista Previa" style="max-width: 140px; height: 140px; object-fit: cover; border-radius: 12px; border: 1px solid var(--border-color);">
-              </div>
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                 <input type="text" name="name" placeholder="Nombre *" required>
                 <select name="category" required>
@@ -220,12 +217,27 @@
                 <input type="number" name="price" placeholder="Precio *" step="1" min="1" required>
                 <input type="number" name="stock" placeholder="Stock *" min="0" required>
               </div>
-              <input type="text" name="image" placeholder="URL Imagen Principal (opcional)">
-              <input type="text" name="images" placeholder="URLs de imágenes secundarias (separadas por comas, opcional)">
-              <div class="file-input">
-                <label>O subir imagen principal:</label>
-                <input type="file" id="imageUpload" accept="image/*">
+
+              <!-- MULTI-IMAGE UPLOADER -->
+              <div style="margin-top: 12px;">
+                <label style="font-weight: 700; font-size: 0.85rem; color: var(--accent-strong); display: block; margin-bottom: 8px;">📸 Imágenes del producto</label>
+                
+                <!-- Drop zone -->
+                <div id="imgDropZone" style="border: 2px dashed var(--border-color); border-radius: var(--radius-md); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: var(--bg-primary);">
+                  <div style="font-size: 2rem; margin-bottom: 8px;">🖼️</div>
+                  <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Arrastra imágenes aquí o <strong style="color: var(--accent);">haz clic para seleccionar</strong></p>
+                  <p style="margin: 4px 0 0; color: var(--text-muted); font-size: 0.78rem;">Puedes seleccionar varias a la vez. La primera será la imagen principal.</p>
+                  <input type="file" id="multiImageUpload" accept="image/*" multiple style="display: none;">
+                </div>
+
+                <!-- Thumbnails grid -->
+                <div id="imgThumbnailGrid" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;"></div>
+
+                <!-- Hidden fields to carry URLs -->
+                <input type="hidden" name="image" id="hiddenMainImage">
+                <input type="hidden" name="images" id="hiddenExtraImages">
               </div>
+
               <textarea name="description" placeholder="Descripción"></textarea>
               <div class="form-buttons">
                 <button type="submit" class="btn btn-primary">Guardar</button>
