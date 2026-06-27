@@ -407,14 +407,13 @@ async function deleteProduct(id) {
 productForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  // Si el textarea de URL tiene contenido, añadirlo automáticamente antes de guardar
+  // Si el textarea de URL tiene contenido, añadirlo automáticamente a imgEntries
   const pendingUrlText = imgUrlInput.value.trim();
   if (pendingUrlText) {
     const pendingUrls = pendingUrlText.split(/[,\n]/)
       .map(u => u.trim())
       .filter(Boolean)
       .map(u => {
-        // Si no tiene http:// o https://, se lo agregamos automáticamente
         if (!/^https?:\/\//i.test(u)) {
           return 'https://' + u;
         }
@@ -422,20 +421,17 @@ productForm.addEventListener('submit', async (event) => {
       });
 
     pendingUrls.forEach(url => {
-      // Evitar duplicados
       if (!imgEntries.some(e => e.url === url)) {
         imgEntries.push({ url, isUploading: false, isMain: imgEntries.length === 0 });
       }
     });
 
-    if (pendingUrls.length > 0) {
-      imgUrlInput.value = '';
-      imgUrlPreviewRow.style.display = 'none';
-      imgUrlPreviewRow.innerHTML = '';
-    }
+    imgUrlInput.value = '';
+    imgUrlPreviewRow.style.display = 'none';
+    imgUrlPreviewRow.innerHTML = '';
   }
 
-  // Sincronizar campos ocultos ahora que hemos procesado todas las URLs
+  // Sincronizar campos ocultos por compatibilidad con otros scripts
   syncHiddenFields();
 
   // Bloquear si hay imágenes aún subiendo
@@ -446,10 +442,12 @@ productForm.addEventListener('submit', async (event) => {
 
   const formData = new FormData(productForm);
 
-  const mainImage = hiddenMain.value.trim() || 'https://via.placeholder.com/400x300?text=Producto';
-  const extraImages = hiddenExtras.value.trim()
-    ? hiddenExtras.value.split(',').map(s => s.trim()).filter(Boolean)
-    : [];
+  // Obtener imágenes directamente de imgEntries listas
+  const readyEntries = imgEntries.filter(e => !e.isUploading && e.url);
+  const mainEntry = readyEntries.find(e => e.isMain) || readyEntries[0] || null;
+
+  const mainImage = mainEntry ? mainEntry.url : 'https://via.placeholder.com/400x300?text=Producto';
+  const extraImages = readyEntries.filter(e => e !== mainEntry).map(e => e.url);
 
   const productData = {
     name: (formData.get('name') || '').trim(),
