@@ -1,3 +1,10 @@
+// Cargar variables de entorno desde .env para desarrollo local
+try {
+  require('dotenv').config();
+} catch (e) {
+  // Ignorar si dotenv no está instalado (por ejemplo en producción)
+}
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
@@ -6,7 +13,36 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
 const cloudinary = require('cloudinary').v2;
-// Cloudinary se autoconfigura desde la variable de entorno CLOUDINARY_URL
+
+// Limpiar y configurar Cloudinary desde CLOUDINARY_URL si está presente
+if (process.env.CLOUDINARY_URL) {
+  let cloudinaryUrl = process.env.CLOUDINARY_URL.trim();
+  // Quitar comillas si las tuviera (común al pegar en algunos entornos)
+  if ((cloudinaryUrl.startsWith('"') && cloudinaryUrl.endsWith('"')) || 
+      (cloudinaryUrl.startsWith("'") && cloudinaryUrl.endsWith("'"))) {
+    cloudinaryUrl = cloudinaryUrl.slice(1, -1).trim();
+  }
+  process.env.CLOUDINARY_URL = cloudinaryUrl;
+
+  const match = cloudinaryUrl.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
+  if (match) {
+    const apiKey = match[1];
+    const apiSecret = match[2];
+    const cloudName = match[3];
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true
+    });
+    console.log('Cloudinary inicializado con éxito. Cloud Name:', cloudName);
+  } else {
+    console.error('Error: El formato de CLOUDINARY_URL no es válido. Debe ser "cloudinary://<api_key>:<api_secret>@<cloud_name>"');
+    cloudinary.config({ cloud_name: '', api_key: '', api_secret: '' });
+  }
+} else {
+  console.warn('ADVERTENCIA: CLOUDINARY_URL no está definida. Las imágenes se guardarán de forma local en la carpeta "uploads/". NOTA: En servidores como Render, estas imágenes se borrarán cuando el servidor se reinicie.');
+}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -253,8 +289,15 @@ app.post('/api/admin/login', async (req, res) => {
 app.post('/api/upload-image', requireAdmin, upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió ninguna imagen.' });
 
-  // Intentar subir a Cloudinary si está configurado
+  // Si CLOUDINARY_URL está configurada, forzar la subida a Cloudinary y no usar fallback local en caso de fallo
   if (process.env.CLOUDINARY_URL) {
+    const config = cloudinary.config();
+    if (!config.cloud_name || !config.api_key || !config.api_secret) {
+      return res.status(400).json({
+        error: 'CLOUDINARY_URL está configurada pero su formato es incorrecto. Debe tener la estructura: cloudinary://API_KEY:API_SECRET@CLOUD_NAME'
+      });
+    }
+
     try {
       const uploadResult = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -268,22 +311,26 @@ app.post('/api/upload-image', requireAdmin, upload.single('image'), async (req, 
       });
       return res.json({ url: uploadResult.secure_url });
     } catch (cloudinaryErr) {
-      // Cloudinary falló — registrar el error real y usar fallback local
-      console.error('Cloudinary falló, usando almacenamiento local:', cloudinaryErr.message || cloudinaryErr);
+      console.error('Error al subir a Cloudinary:', cloudinaryErr);
+      return res.status(500).json({
+        error: `Fallo al subir a Cloudinary: ${cloudinaryErr.message || JSON.stringify(cloudinaryErr)}`
+      });
     }
   }
 
-  // Fallback: guardar localmente en /uploads/
+  // Fallback local: Solo si CLOUDINARY_URL no está configurada en absoluto
   try {
     await fs.mkdir(UPLOADS_DIR, { recursive: true });
     const ext = path.extname(req.file.originalname) || '.jpg';
     const filename = Date.now().toString(36) + '-' + Math.round(Math.random() * 1e9) + ext;
     const filepath = path.join(UPLOADS_DIR, filename);
     await fs.writeFile(filepath, req.file.buffer);
+    
+    console.warn('Advertencia: Imagen guardada localmente debido a la falta de CLOUDINARY_URL. Recuerda que se borrará si el servidor se reinicia.');
     return res.json({ url: `/uploads/${filename}` });
   } catch (localErr) {
     console.error('Error al guardar imagen localmente:', localErr);
-    return res.status(500).json({ error: 'No se pudo subir la imagen. Verifica las credenciales de Cloudinary o los permisos del servidor.' });
+    return res.status(500).json({ error: 'No se pudo guardar la imagen localmente.' });
   }
 });
 
