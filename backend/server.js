@@ -17,6 +17,10 @@ const cloudinary = require('cloudinary').v2;
 // Limpiar y configurar Cloudinary desde CLOUDINARY_URL si está presente
 if (process.env.CLOUDINARY_URL) {
   let cloudinaryUrl = process.env.CLOUDINARY_URL.trim();
+  // Quitar el prefijo CLOUDINARY_URL= si se copió entero por error
+  if (cloudinaryUrl.startsWith('CLOUDINARY_URL=')) {
+    cloudinaryUrl = cloudinaryUrl.replace('CLOUDINARY_URL=', '').trim();
+  }
   // Quitar comillas si las tuviera (común al pegar en algunos entornos)
   if ((cloudinaryUrl.startsWith('"') && cloudinaryUrl.endsWith('"')) || 
       (cloudinaryUrl.startsWith("'") && cloudinaryUrl.endsWith("'"))) {
