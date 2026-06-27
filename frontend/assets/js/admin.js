@@ -410,6 +410,22 @@ productForm.addEventListener('submit', async (event) => {
   // Sincronizar campos ocultos PRIMERO, antes de leer cualquier valor
   syncHiddenFields();
 
+  // Si el textarea de URL tiene contenido, añadirlo automáticamente antes de guardar
+  const pendingUrlText = imgUrlInput.value.trim();
+  if (pendingUrlText) {
+    const pendingUrls = pendingUrlText.split(/[,\n]/).map(u => u.trim()).filter(u => u.startsWith('http://') || u.startsWith('https://'));
+    pendingUrls.forEach(url => {
+      imgEntries.push({ url, isUploading: false, isMain: imgEntries.length === 0 });
+    });
+    if (pendingUrls.length > 0) {
+      imgUrlInput.value = '';
+      imgUrlPreviewRow.style.display = 'none';
+      imgUrlPreviewRow.innerHTML = '';
+      syncHiddenFields();
+      renderImgGrid();
+    }
+  }
+
   // Bloquear si hay imágenes aún subiendo
   if (imgEntries.some(e => e.isUploading)) {
     showStatus('Espera a que terminen de subir todas las imágenes antes de guardar.', 'error');
@@ -422,11 +438,6 @@ productForm.addEventListener('submit', async (event) => {
   const extraImages = hiddenExtras.value.trim()
     ? hiddenExtras.value.split(',').map(s => s.trim()).filter(Boolean)
     : [];
-
-  // Debug: mostrar qué se va a guardar
-  console.log('[Submit] imgEntries:', JSON.stringify(imgEntries));
-  console.log('[Submit] mainImage:', mainImage);
-  console.log('[Submit] extraImages:', extraImages);
 
   const productData = {
     name: (formData.get('name') || '').trim(),
