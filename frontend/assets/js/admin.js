@@ -111,31 +111,60 @@ multiUpload.addEventListener('change', () => {
   multiUpload.value = '';
 });
 
-// Añadir imagen por URL
-const imgUrlInput = document.getElementById('imgUrlInput');
+// Añadir imagen por URL — soporta varias a la vez (coma o salto de línea)
+const imgUrlInput  = document.getElementById('imgUrlInput');
 const imgUrlAddBtn = document.getElementById('imgUrlAddBtn');
+const imgUrlPreviewRow = document.getElementById('imgUrlPreviewRow');
 
-function addImageByUrl() {
-  const url = imgUrlInput.value.trim();
-  if (!url) return;
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    showStatus('La URL debe comenzar con http:// o https://', 'error');
+// Vista previa en tiempo real mientras escribe en el textarea
+imgUrlInput.addEventListener('input', () => {
+  const raw = imgUrlInput.value;
+  const urls = raw.split(/[,\n]/).map(u => u.trim()).filter(u => u.startsWith('http://') || u.startsWith('https://'));
+  if (urls.length === 0) {
+    imgUrlPreviewRow.style.display = 'none';
+    imgUrlPreviewRow.innerHTML = '';
     return;
   }
-  imgEntries.push({ url, isUploading: false, isMain: imgEntries.length === 0 });
+  imgUrlPreviewRow.style.display = 'flex';
+  imgUrlPreviewRow.innerHTML = urls.map(u =>
+    `<img src="${u}" alt="preview" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:2px solid var(--border-color);" onerror="this.style.display='none'">`
+  ).join('');
+});
+
+function addImageByUrl() {
+  const raw = imgUrlInput.value.trim();
+  if (!raw) return;
+  const urls = raw.split(/[,\n]/).map(u => u.trim()).filter(u => u);
+  let added = 0;
+  for (const url of urls) {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) continue;
+    imgEntries.push({ url, isUploading: false, isMain: imgEntries.length === 0 && added === 0 });
+    added++;
+  }
+  if (added === 0) {
+    showStatus('Las URLs deben comenzar con http:// o https://', 'error');
+    return;
+  }
   imgUrlInput.value = '';
+  imgUrlPreviewRow.style.display = 'none';
+  imgUrlPreviewRow.innerHTML = '';
   renderImgGrid();
   syncHiddenFields();
 }
 
 imgUrlAddBtn.addEventListener('click', addImageByUrl);
-imgUrlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addImageByUrl(); } });
+imgUrlInput.addEventListener('keydown', (e) => {
+  // Ctrl+Enter o Cmd+Enter para añadir sin salto de línea
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); addImageByUrl(); }
+});
 
 
 async function handleImageFiles(files) {
   for (const file of files) {
     const idx = imgEntries.length;
-    imgEntries.push({ url: '', isUploading: true, isMain: idx === 0 && imgEntries.length === 0 });
+    // Vista previa local inmediata mientras sube a Cloudinary
+    const localPreviewUrl = URL.createObjectURL(file);
+    imgEntries.push({ url: localPreviewUrl, isUploading: true, isMain: imgEntries.length === 0 });
     renderImgGrid();
 
     try {
@@ -151,12 +180,13 @@ async function handleImageFiles(files) {
         throw new Error(err.error || 'Error al subir imagen.');
       }
       const data = await res.json();
+      URL.revokeObjectURL(localPreviewUrl);
       imgEntries[idx].url = data.url;
       imgEntries[idx].isUploading = false;
 
-      // First image auto-becomes main if nothing is main yet
       if (!imgEntries.some(e => e.isMain)) imgEntries[idx].isMain = true;
     } catch (err) {
+      URL.revokeObjectURL(localPreviewUrl);
       imgEntries.splice(idx, 1);
       showStatus(err.message, 'error');
     }
@@ -167,21 +197,18 @@ async function handleImageFiles(files) {
 
 function renderImgGrid() {
   imgGrid.innerHTML = imgEntries.map((entry, i) => {
-    if (entry.isUploading) {
-      return `
-        <div style="position:relative; width:100px; height:100px; border-radius:10px; border:2px solid var(--border-color); overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--bg-primary);">
-          <div style="font-size:1.4rem; animation: spin 1s linear infinite;">⏳</div>
-        </div>`;
-    }
     const isMain = entry.isMain;
     return `
-      <div data-imgidx="${i}" style="position:relative; width:100px; height:100px; border-radius:10px; border:3px solid ${isMain ? 'var(--accent)' : 'var(--border-color)'}; overflow:hidden; box-shadow: ${isMain ? '0 0 0 2px var(--accent)' : 'none'};">
-        <img src="${entry.url}" alt="img" style="width:100%; height:100%; object-fit:cover; display:block;">
-        ${isMain ? '<div style="position:absolute;top:4px;left:4px;background:var(--accent);color:#fff;font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:20px;">PRINCIPAL</div>' : ''}
+      <div data-imgidx="${i}" style="position:relative; width:100px; height:100px; border-radius:10px; border:3px solid ${isMain && !entry.isUploading ? 'var(--accent)' : 'var(--border-color)'}; overflow:hidden; box-shadow: ${isMain && !entry.isUploading ? '0 0 0 2px var(--accent)' : 'none'};">
+        <img src="${entry.url}" alt="img" style="width:100%; height:100%; object-fit:cover; display:block; ${entry.isUploading ? 'filter:blur(3px) brightness(0.65);' : ''}">
+        ${entry.isUploading
+          ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">⏳</div>'
+          : `${isMain ? '<div style="position:absolute;top:4px;left:4px;background:var(--accent);color:#fff;font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:20px;">PRINCIPAL</div>' : ''}
         <div style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:2px;background:rgba(0,0,0,0.55);padding:4px;">
           ${!isMain ? `<button type="button" class="imgSetMain" data-i="${i}" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:0.62rem;cursor:pointer;padding:2px;">⭐ Principal</button>` : ''}
           <button type="button" class="imgRemove" data-i="${i}" style="flex:1;background:#e74c3c;color:#fff;border:none;border-radius:4px;font-size:0.62rem;cursor:pointer;padding:2px;">🗑 Quitar</button>
-        </div>
+        </div>`
+        }
       </div>`;
   }).join('');
 }

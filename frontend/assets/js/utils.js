@@ -95,3 +95,25 @@ document.getElementById('themeToggle')?.addEventListener('click', () => {
     if (themeToggle) themeToggle.textContent = '☀️';
   }
 });
+
+// ── Ocultar menú de categorías al hacer scroll en móvil ──────────────────────
+(function () {
+  let lastScrollY = window.scrollY;
+
+  window.addEventListener('scroll', () => {
+    // Solo aplica en pantallas móviles
+    if (window.innerWidth > 768) return;
+    const catNav = document.querySelector('.category-nav');
+    if (!catNav) return;
+
+    const currentY = window.scrollY;
+    if (currentY > lastScrollY && currentY > 60) {
+      // Scrolleando hacia abajo → ocultar
+      catNav.classList.add('nav-collapsed');
+    } else {
+      // Scrolleando hacia arriba o en el tope → mostrar
+      catNav.classList.remove('nav-collapsed');
+    }
+    lastScrollY = currentY;
+  }, { passive: true });
+})();

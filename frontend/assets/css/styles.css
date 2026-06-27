@@ -264,6 +264,20 @@ h1, h2, h3, h4, h5, h6 {
   gap: 12px;
   padding: 16px 0;
   border-top: 1px solid rgba(233, 43, 114, 0.04);
+  /* Transición para colapsar en móvil */
+  transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), padding 0.32s ease, opacity 0.3s ease;
+  max-height: 400px;
+  overflow: hidden;
+}
+
+/* Se activa vía JS al hacer scroll hacia abajo en móvil */
+.category-nav.nav-collapsed {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  border-top-color: transparent;
 }
 
 .cat-btn {
