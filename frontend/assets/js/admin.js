@@ -407,24 +407,36 @@ async function deleteProduct(id) {
 productForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  // Sincronizar campos ocultos PRIMERO, antes de leer cualquier valor
-  syncHiddenFields();
-
   // Si el textarea de URL tiene contenido, añadirlo automáticamente antes de guardar
   const pendingUrlText = imgUrlInput.value.trim();
   if (pendingUrlText) {
-    const pendingUrls = pendingUrlText.split(/[,\n]/).map(u => u.trim()).filter(u => u.startsWith('http://') || u.startsWith('https://'));
+    const pendingUrls = pendingUrlText.split(/[,\n]/)
+      .map(u => u.trim())
+      .filter(Boolean)
+      .map(u => {
+        // Si no tiene http:// o https://, se lo agregamos automáticamente
+        if (!/^https?:\/\//i.test(u)) {
+          return 'https://' + u;
+        }
+        return u;
+      });
+
     pendingUrls.forEach(url => {
-      imgEntries.push({ url, isUploading: false, isMain: imgEntries.length === 0 });
+      // Evitar duplicados
+      if (!imgEntries.some(e => e.url === url)) {
+        imgEntries.push({ url, isUploading: false, isMain: imgEntries.length === 0 });
+      }
     });
+
     if (pendingUrls.length > 0) {
       imgUrlInput.value = '';
       imgUrlPreviewRow.style.display = 'none';
       imgUrlPreviewRow.innerHTML = '';
-      syncHiddenFields();
-      renderImgGrid();
     }
   }
+
+  // Sincronizar campos ocultos ahora que hemos procesado todas las URLs
+  syncHiddenFields();
 
   // Bloquear si hay imágenes aún subiendo
   if (imgEntries.some(e => e.isUploading)) {
