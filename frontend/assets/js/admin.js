@@ -233,9 +233,11 @@ imgGrid.addEventListener('click', (e) => {
 });
 
 function syncHiddenFields() {
-  const mainEntry = imgEntries.find(e => e.isMain && e.url);
+  // Solo considerar imágenes YA subidas (no blob: temporales)
+  const readyEntries = imgEntries.filter(e => !e.isUploading && e.url);
+  const mainEntry = readyEntries.find(e => e.isMain) || readyEntries[0] || null;
   hiddenMain.value  = mainEntry ? mainEntry.url : '';
-  hiddenExtras.value = imgEntries.filter(e => !e.isMain && e.url).map(e => e.url).join(',');
+  hiddenExtras.value = readyEntries.filter(e => e !== mainEntry).map(e => e.url).join(',');
 }
 
 function clearImgEntries() {
@@ -404,23 +406,36 @@ async function deleteProduct(id) {
 
 productForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const formData = new FormData(productForm);
 
+  // Sincronizar campos ocultos PRIMERO, antes de leer cualquier valor
   syncHiddenFields();
+
+  // Bloquear si hay imágenes aún subiendo
+  if (imgEntries.some(e => e.isUploading)) {
+    showStatus('Espera a que terminen de subir todas las imágenes antes de guardar.', 'error');
+    return;
+  }
+
+  const formData = new FormData(productForm);
 
   const mainImage = hiddenMain.value.trim() || 'https://via.placeholder.com/400x300?text=Producto';
   const extraImages = hiddenExtras.value.trim()
     ? hiddenExtras.value.split(',').map(s => s.trim()).filter(Boolean)
     : [];
 
+  // Debug: mostrar qué se va a guardar
+  console.log('[Submit] imgEntries:', JSON.stringify(imgEntries));
+  console.log('[Submit] mainImage:', mainImage);
+  console.log('[Submit] extraImages:', extraImages);
+
   const productData = {
-    name: formData.get('name').trim(),
-    category: formData.get('category').trim(),
+    name: (formData.get('name') || '').trim(),
+    category: (formData.get('category') || '').trim(),
     price: Number(formData.get('price')),
     stock: Number(formData.get('stock')) || 0,
     image: mainImage,
     images: extraImages,
-    description: formData.get('description').trim(),
+    description: (formData.get('description') || '').trim(),
   };
   const id = formData.get('id');
 
