@@ -230,6 +230,12 @@
                   <input type="file" id="multiImageUpload" accept="image/*" multiple style="display: none;">
                 </div>
 
+                <!-- Añadir por URL -->
+                <div style="display: flex; gap: 8px; margin-top: 10px; align-items: center;">
+                  <input type="text" id="imgUrlInput" placeholder="O pega aquí la URL de una imagen y presiona Añadir" style="flex: 1; padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-primary); font-size: 0.88rem; outline: none;">
+                  <button type="button" id="imgUrlAddBtn" class="btn btn-secondary" style="white-space: nowrap; padding: 10px 18px; font-size: 0.85rem;">＋ Añadir URL</button>
+                </div>
+
                 <!-- Thumbnails grid -->
                 <div id="imgThumbnailGrid" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;"></div>
 

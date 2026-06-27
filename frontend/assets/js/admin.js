@@ -111,6 +111,27 @@ multiUpload.addEventListener('change', () => {
   multiUpload.value = '';
 });
 
+// Añadir imagen por URL
+const imgUrlInput = document.getElementById('imgUrlInput');
+const imgUrlAddBtn = document.getElementById('imgUrlAddBtn');
+
+function addImageByUrl() {
+  const url = imgUrlInput.value.trim();
+  if (!url) return;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    showStatus('La URL debe comenzar con http:// o https://', 'error');
+    return;
+  }
+  imgEntries.push({ url, isUploading: false, isMain: imgEntries.length === 0 });
+  imgUrlInput.value = '';
+  renderImgGrid();
+  syncHiddenFields();
+}
+
+imgUrlAddBtn.addEventListener('click', addImageByUrl);
+imgUrlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addImageByUrl(); } });
+
+
 async function handleImageFiles(files) {
   for (const file of files) {
     const idx = imgEntries.length;
