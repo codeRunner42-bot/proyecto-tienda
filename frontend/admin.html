@@ -192,7 +192,18 @@
       <section class="tab-pane" id="tab-products">
         <div class="admin-actions" style="margin-bottom: 24px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
           <button id="newProductBtn" class="btn btn-primary">Nuevo Producto</button>
-          <input type="text" id="searchInput" placeholder="Buscar productos..." style="max-width: 320px; width: 100%; padding: 10px 18px; border-radius: var(--radius-round); border: 1px solid var(--border-color); outline: none; background: var(--bg-primary);">
+          <div style="display: flex; gap: 12px; align-items: center; flex-grow: 1; justify-content: flex-end; max-width: 600px; width: 100%;">
+            <select id="categoryFilter" style="padding: 10px 18px; border-radius: var(--radius-round); border: 1px solid var(--border-color); outline: none; background: var(--bg-primary); color: var(--text-main); font-weight: 600; cursor: pointer; min-width: 160px;">
+              <option value="all">Todas las Categorías</option>
+              <option value="maquillaje">Maquillaje</option>
+              <option value="perfumeria">Perfumería</option>
+              <option value="tecnologia">Tecnología</option>
+              <option value="accesorios">Accesorios</option>
+              <option value="cuidado personal">Cuidado Personal</option>
+              <option value="capilar">Capilar</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Buscar productos..." style="max-width: 320px; width: 100%; padding: 10px 18px; border-radius: var(--radius-round); border: 1px solid var(--border-color); outline: none; background: var(--bg-primary);">
+          </div>
         </div>
 
         <div class="admin-grid" style="display: grid; grid-template-columns: 1fr; gap: 24px;">

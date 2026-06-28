@@ -502,17 +502,28 @@ adminListBody.addEventListener('click', async (event) => {
   }
 });
 
-searchInput.addEventListener('input', () => {
+// Filtrar productos combinando texto y categoría
+const categoryFilter = document.getElementById('categoryFilter');
+
+function filterProducts() {
   const term = searchInput.value.trim().toLowerCase();
+  const selectedCat = categoryFilter.value;
+
   const filtered = allProducts.filter((product) => {
-    return (
+    const matchesText = (
       product.name.toLowerCase().includes(term) ||
       product.category.toLowerCase().includes(term) ||
       String(product.id).toLowerCase().includes(term)
     );
+    const matchesCategory = (selectedCat === 'all' || product.category === selectedCat);
+
+    return matchesText && matchesCategory;
   });
   renderProductTable(filtered);
-});
+}
+
+searchInput.addEventListener('input', filterProducts);
+categoryFilter.addEventListener('change', filterProducts);
 
 newProductBtn.addEventListener('click', () => {
   resetForm();
