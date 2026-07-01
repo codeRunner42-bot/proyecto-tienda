@@ -264,10 +264,15 @@ h1, h2, h3, h4, h5, h6 {
   gap: 12px;
   padding: 16px 0;
   border-top: 1px solid rgba(233, 43, 114, 0.04);
-  /* Transición para colapsar en móvil */
-  transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), padding 0.32s ease, opacity 0.3s ease;
+  /* Transición más suave para evitar ruptura visual */
+  transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+              padding 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+              opacity 0.3s ease, 
+              border-color 0.3s ease,
+              transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   max-height: 400px;
   overflow: hidden;
+  transform-origin: top;
 }
 
 /* Se activa vía JS al hacer scroll hacia abajo en móvil */
@@ -278,6 +283,7 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0;
   pointer-events: none;
   border-top-color: transparent;
+  transform: translateY(-10px) scaleY(0.95);
 }
 
 .cat-btn {
